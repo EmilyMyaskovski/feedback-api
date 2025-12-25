@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Feedback Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
+        .header-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; margin-bottom: 2rem; }
+        .star { color: #FFD700; }
+    </style>
+</head>
+<body>
+
+    <div class="header-bg text-center">
+        <h1>📊 פורטל משוב חכם</h1>
+        <p>מבט על נתוני האפליקציה בזמן אמת</p>
+    </div>
+
+    <div class="container">
+        <div class="card p-4">
+            <h4 class="mb-3">דיווחי משתמשים אחרונים</h4>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>פיצ'ר</th>
+                        <th>דירוג</th>
+                        <th>תוכן המשוב</th>
+                        <th>מכשיר</th>
+                        <th>תמונה</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // פונקציה שמופעלת כשהדף עולה
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchFeedbacks();
+        });
+
+        // 1. משיכת הנתונים מהשרת שבנינו
+        function fetchFeedbacks() {
+            fetch('/api/feedback')
+                .then(response => response.json())
+                .then(data => {
+                    renderTable(data);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // 2. בניית הטבלה דינמית
+        function renderTable(data) {
+            const tableBody = document.getElementById('feedbackTableBody');
+            tableBody.innerHTML = ""; // ניקוי
+
+            data.forEach(report => {
+                // הופך מספר כוכבים לאייקונים ⭐
+                const stars = '⭐'.repeat(report.rating);
+                
+                // יצירת תצוגה מקדימה לתמונה (אם קיימת)
+                let imageHtml = '<span class="text-muted">אין</span>';
+                if (report.screenshotBase64) {
+                    // יוצר תמונה קטנה שאפשר להקליק עליה
+                    imageHtml = `<img src="data:image/jpeg;base64,${report.screenshotBase64}" 
+                                      height="50" style="cursor:pointer; border:1px solid #ccc;" 
+                                      onclick="window.open(this.src)">`;
+                }
+
+                const row = `
+                    <tr>
+                        <td>${report.id}</td>
+                        <td><span class="badge bg-primary">${report.featureTag}</span></td>
+                        <td>${stars}</td>
+                        <td>${report.userText}</td>
+                        <td style="font-size: 0.85em; color: gray;">
+                            ${report.deviceModel}<br>${report.osVersion}
+                        </td>
+                        <td>${imageHtml}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+    </script>
+</body>
+</html>
