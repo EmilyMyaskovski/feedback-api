@@ -1,7 +1,13 @@
 package com.example.feedback_api;
 
+import jakarta.validation.Valid;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @RestController
 @RequestMapping("/api/feedback")
@@ -10,21 +16,47 @@ public class FeedbackController {
 
     private final FeedbackRepository repository;
 
+     // Fallback storage if DB is down (prevents 500)
+    private final List<FeedbackReport> inMemory = new CopyOnWriteArrayList<>();
+
     public FeedbackController(FeedbackRepository repository) {
         this.repository = repository;
     }
 
-    // 1) Create new feedback
-    // POST http://<PC_IP>:8083/api/feedback
+     // POST /api/feedback
     @PostMapping
-    public FeedbackReport create(@RequestBody FeedbackReport report) {
-        return repository.save(report);
+    public ResponseEntity<?> create(@Valid @RequestBody FeedbackReport report) {
+        try {
+            FeedbackReport saved = repository.save(report);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (DataAccessException ex) {
+            // DB problem (timeout / unreachable / schema) -> fallback instead of 500
+            report.setId(null); // ensure no fake id
+            inMemory.add(report);
+
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("stored", "memory");
+            res.put("message", "DB unavailable, stored in memory temporarily");
+            res.put("report", report);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        }
     }
 
-    // 2) Get all feedbacks
-    // GET http://<PC_IP>:8083/api/feedback
+    // GET /api/feedback
     @GetMapping
-    public List<FeedbackReport> getAllFeedbacks() {
-        return repository.findAll();
+    public ResponseEntity<?> getAllFeedbacks() {
+        try {
+            return ResponseEntity.ok(repository.findAll());
+        } catch (DataAccessException ex) {
+            // DB down -> return fallback data
+            return ResponseEntity.ok(inMemory);
+        }
+    }
+
+    // Optional: health check
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
     }
 }
