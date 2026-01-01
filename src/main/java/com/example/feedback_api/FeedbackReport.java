@@ -1,23 +1,21 @@
 package com.example.feedback_api;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Entity
-@Table(name = "feedback_reports")
+@Document(collection = "feedback_reports")
 public class FeedbackReport {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotBlank
-    @Column(length = 4000)
     private String userText;
 
     @NotNull
@@ -26,31 +24,18 @@ public class FeedbackReport {
     private Integer rating;
 
     @NotBlank
-    @Column(length = 255)
     private String featureTag;
 
-    @Column(length = 255)
     private String deviceModel;
-
-    @Column(length = 50)
     private String osVersion;
-
-    // IMPORTANT: screenshot can be large, so store as LOB (TEXT / CLOB)
-    @Lob
-    @Column(columnDefinition = "TEXT")
     private String screenshotBase64;
-
-    @Column(length = 10)
     private String country;
-
     private Instant createdAt = Instant.now();
 
     public FeedbackReport() {}
 
-    // Getters/Setters
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getUserText() { return userText; }
     public void setUserText(String userText) { this.userText = userText; }
