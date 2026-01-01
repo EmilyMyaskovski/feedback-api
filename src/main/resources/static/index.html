@@ -2,15 +2,97 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Feedback Dashboard</title>
+    <title>Smart Feedback Analytics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
     <style>
-        body { background-color: #f8f9fa; }
-        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
-        .header-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; margin-bottom: 2rem; }
-        .star { color: #FFD700; }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { font-weight: 700; color: #333; }
     </style>
 </head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">🌍 מפת שביעות רצון עולמית</h1>
+    
+    <div class="chart-container">
+        <div id="regions_div" style="width: 100%; height: 500px;"></div>
+    </div>
+
+    <div class="mt-5">
+        <h4>נתונים גולמיים</h4>
+        <table class="table table-striped" id="dataTable">
+            </table>
+    </div>
+</div>
+
+<script>
+    // טעינת הגרפים של גוגל
+    google.charts.load('current', {
+        'packages':['geochart'],
+    });
+    
+    // מפעיל את הציור רק כשהספרייה נטענה
+    google.charts.setOnLoadCallback(fetchAndDrawMap);
+
+    function fetchAndDrawMap() {
+        fetch('/api/feedback')
+            .then(response => response.json())
+            .then(data => {
+                processDataForMap(data);
+            });
+    }
+
+    function processDataForMap(rawData) {
+        // 1. חישוב ממוצע לכל מדינה
+        // אובייקט שיחזיק: { "IL": {total: 15, count: 3}, "US": {total: 8, count: 2} }
+        const countryStats = {};
+
+        rawData.forEach(report => {
+            const country = report.country || "Unknown"; // אם אין מדינה
+            const rating = report.rating || 0;
+
+            if (!countryStats[country]) {
+                countryStats[country] = { sum: 0, count: 0 };
+            }
+            countryStats[country].sum += rating;
+            countryStats[country].count += 1;
+        });
+
+        // 2. המרה לפורמט של גוגל: [['Country', 'Average Rating'], ['IL', 5.0], ...]
+        const mapData = [['Country', 'Average Rating']];
+        
+        for (const [code, stats] of Object.entries(countryStats)) {
+            if (code !== "Unknown") {
+                const avg = stats.sum / stats.count;
+                mapData.push([code, avg]);
+            }
+        }
+
+        // 3. ציור המפה
+        const dataTable = google.visualization.arrayToDataTable(mapData);
+
+        const options = {
+            // הסקאלה של הצבעים: 0 (אדום) -> 2.5 (צהוב) -> 5 (ירוק)
+            colorAxis: { 
+                minValue: 0, 
+                maxValue: 5, 
+                colors: ['#e74c3c', '#f1c40f', '#2ecc71'] 
+            },
+            backgroundColor: '#f4f6f9',
+            datalessRegionColor: '#eeeeee',
+            defaultColor: '#f5f5f5',
+        };
+
+        const chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+        chart.draw(dataTable, options);
+    }
+</script>
+
+</body>
+</html>
 <body>
 
     <div class="header-bg text-center">

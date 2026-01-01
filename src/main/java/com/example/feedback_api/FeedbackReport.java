@@ -16,10 +16,9 @@ public class FeedbackReport {
     private String deviceModel;
     private String osVersion;
     private String screenshotBase64; // נשמור את התמונה כטקסט מוצפן
+    private String country;
 
-    private LocalDateTime timestamp = LocalDateTime.now();
-
-    // Getters and Setters (או להשתמש ב-@Data של Lombok)
+    // Getters and Setters 
     public String getUserText() { return userText; }
     public void setUserText(String userText) { this.userText = userText; }
     public int getRating() { return rating; }
@@ -34,4 +33,6 @@ public class FeedbackReport {
     public void setScreenshotBase64(String screenshotBase64) { this.screenshotBase64 = screenshotBase64; }
     public String getId() { return id; }
     public void setId(String id) {this.id = id; }
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
 }
