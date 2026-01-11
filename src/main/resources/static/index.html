@@ -1,172 +1,199 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Feedback Analytics</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     
     <style>
         body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { font-weight: 700; color: #333; }
+        .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
+        h1, h2, h3, h4 { font-weight: 700; }
     </style>
 </head>
 <body>
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">🌍 מפת שביעות רצון עולמית</h1>
-    
-    <div class="chart-container">
-        <div id="regions_div" style="width: 100%; height: 500px;"></div>
-    </div>
-
-    <div class="mt-5">
-        <h4>נתונים גולמיים</h4>
-        <table class="table table-striped" id="dataTable">
-            </table>
-    </div>
-</div>
-
-<script>
-    // טעינת הגרפים של גוגל
-    google.charts.load('current', {
-        'packages':['geochart'],
-    });
-    
-    // מפעיל את הציור רק כשהספרייה נטענה
-    google.charts.setOnLoadCallback(fetchAndDrawMap);
-
-    function fetchAndDrawMap() {
-        fetch('/api/feedback')
-            .then(response => response.json())
-            .then(data => {
-                processDataForMap(data);
-            });
-    }
-
-    function processDataForMap(rawData) {
-        // 1. חישוב ממוצע לכל מדינה
-        // אובייקט שיחזיק: { "IL": {total: 15, count: 3}, "US": {total: 8, count: 2} }
-        const countryStats = {};
-
-        rawData.forEach(report => {
-            const country = report.country || "Unknown"; // אם אין מדינה
-            const rating = report.rating || 0;
-
-            if (!countryStats[country]) {
-                countryStats[country] = { sum: 0, count: 0 };
-            }
-            countryStats[country].sum += rating;
-            countryStats[country].count += 1;
-        });
-
-        // 2. המרה לפורמט של גוגל: [['Country', 'Average Rating'], ['IL', 5.0], ...]
-        const mapData = [['Country', 'Average Rating']];
-        
-        for (const [code, stats] of Object.entries(countryStats)) {
-            if (code !== "Unknown") {
-                const avg = stats.sum / stats.count;
-                mapData.push([code, avg]);
-            }
-        }
-
-        // 3. ציור המפה
-        const dataTable = google.visualization.arrayToDataTable(mapData);
-
-        const options = {
-            // הסקאלה של הצבעים: 0 (אדום) -> 2.5 (צהוב) -> 5 (ירוק)
-            colorAxis: { 
-                minValue: 0, 
-                maxValue: 5, 
-                colors: ['#e74c3c', '#f1c40f', '#2ecc71'] 
-            },
-            backgroundColor: '#f4f6f9',
-            datalessRegionColor: '#eeeeee',
-            defaultColor: '#f5f5f5',
-        };
-
-        const chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
-        chart.draw(dataTable, options);
-    }
-</script>
-
-</body>
-</html>
-<body>
-
     <div class="header-bg text-center">
-        <h1>📊 פורטל משוב חכם</h1>
-        <p>מבט על נתוני האפליקציה בזמן אמת</p>
+        <h1>📊 Smart Feedback Portal</h1>
+        <p>Real-time User Insights & Data</p>
     </div>
 
     <div class="container">
-        <div class="card p-4">
-            <h4 class="mb-3">דיווחי משתמשים אחרונים</h4>
-            <table class="table table-hover">
+        
+        <div class="chart-card">
+            <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
+            <div id="regions_div" style="width: 100%; height: 500px;"></div>
+        </div>
+
+        <div class="chart-card">
+            <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+            <div style="width: 80%; margin: 0 auto;">
+                <canvas id="demographicsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h4 class="mb-3">📝 Recent User Reports</h4>
+            <table class="table table-hover table-striped">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>פיצ'ר</th>
-                        <th>דירוג</th>
-                        <th>תוכן המשוב</th>
-                        <th>מכשיר</th>
-                        <th>תמונה</th>
+                        <th>Feature</th>
+                        <th>Rating</th>
+                        <th>Feedback</th>
+                        <th>Device</th>
+                        <th>Screenshot</th>
                     </tr>
                 </thead>
                 <tbody id="feedbackTableBody">
                     </tbody>
             </table>
         </div>
+
     </div>
 
     <script>
-        // פונקציה שמופעלת כשהדף עולה
-        document.addEventListener("DOMContentLoaded", function() {
-            fetchFeedbacks();
-        });
+        // 1. Initialize Google Charts (for the map)
+        google.charts.load('current', { 'packages':['geochart'] });
+        google.charts.setOnLoadCallback(initDashboard);
 
-        // 1. משיכת הנתונים מהשרת שבנינו
-        function fetchFeedbacks() {
+        // Main initialization function executed on page load
+        function initDashboard() {
+            fetchDataFromAPI();      // Fetch real data
+            drawDemographicsChart(); // Draw static chart (Demographics)
+        }
+
+        // --- Logic for fetching data (Map + Table) ---
+        function fetchDataFromAPI() {
             fetch('/api/feedback')
                 .then(response => response.json())
                 .then(data => {
-                    renderTable(data);
+                    drawMap(data);    // Update map
+                    renderTable(data); // Update table
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
 
-        // 2. בניית הטבלה דינמית
+        // Draw the map (Google GeoChart)
+        function drawMap(rawData) {
+            const countryStats = {};
+            rawData.forEach(report => {
+                const country = report.country || "Unknown";
+                const rating = report.rating || 0;
+                
+                // Aggregate data by country
+                if (!countryStats[country]) { countryStats[country] = { sum: 0, count: 0 }; }
+                countryStats[country].sum += rating;
+                countryStats[country].count += 1;
+            });
+
+            const mapData = [['Country', 'Average Rating']];
+            for (const [code, stats] of Object.entries(countryStats)) {
+                if (code !== "Unknown") {
+                    const avg = stats.sum / stats.count;
+                    mapData.push([code, avg]);
+                }
+            }
+
+            const dataTable = google.visualization.arrayToDataTable(mapData);
+            const options = {
+                colorAxis: { minValue: 1, maxValue: 5, colors: ['#e74c3c', '#f1c40f', '#2ecc71'] },
+                backgroundColor: '#ffffff',
+                datalessRegionColor: '#eeeeee',
+                defaultColor: '#f5f5f5',
+            };
+
+            const chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+            chart.draw(dataTable, options);
+        }
+
+        // Render the data table
         function renderTable(data) {
             const tableBody = document.getElementById('feedbackTableBody');
-            tableBody.innerHTML = ""; // ניקוי
+            tableBody.innerHTML = ""; 
 
-            data.forEach(report => {
-                // הופך מספר כוכבים לאייקונים ⭐
+            // Show only the last 10 reports (reverse array and slice)
+            const recentData = data.slice().reverse().slice(0, 10);
+
+            recentData.forEach(report => {
                 const stars = '⭐'.repeat(report.rating);
+                let imageHtml = '<span class="text-muted">-</span>';
                 
-                // יצירת תצוגה מקדימה לתמונה (אם קיימת)
-                let imageHtml = '<span class="text-muted">אין</span>';
                 if (report.screenshotBase64) {
-                    // יוצר תמונה קטנה שאפשר להקליק עליה
-                    imageHtml = `<img src="data:image/jpeg;base64,${report.screenshotBase64}" 
-                                      height="50" style="cursor:pointer; border:1px solid #ccc;" 
-                                      onclick="window.open(this.src)">`;
+                    // Fix: Check if base64 string already includes prefix to avoid duplication
+                    let src = report.screenshotBase64.startsWith('data:image') 
+                        ? report.screenshotBase64 
+                        : `data:image/jpeg;base64,${report.screenshotBase64}`;
+                        
+                    imageHtml = `<img src="${src}" height="50" style="cursor:pointer; border:1px solid #ccc; border-radius:4px;" onclick="window.open(this.src)">`;
                 }
 
                 const row = `
                     <tr>
-                        <td>${report.id}</td>
+                        <td><small>${report.id.substring(0, 8)}...</small></td>
                         <td><span class="badge bg-primary">${report.featureTag}</span></td>
                         <td>${stars}</td>
                         <td>${report.userText}</td>
                         <td style="font-size: 0.85em; color: gray;">
-                            ${report.deviceModel}<br>${report.osVersion}
+                            <b>${report.deviceModel}</b><br>${report.osVersion}
                         </td>
                         <td>${imageHtml}</td>
                     </tr>
                 `;
                 tableBody.innerHTML += row;
+            });
+        }
+
+        // --- Logic for Demographics Chart (Chart.js) ---
+        function drawDemographicsChart() {
+            const ctx = document.getElementById('demographicsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['15-24', '25-34', '35-44', '45-54', '55-64', '+64'],
+                    datasets: [
+                        {
+                            label: 'Male',
+                            data: [-30, -50, -40, -20, -10, -5], // Negative values = Left orientation
+                            backgroundColor: '#3F51B5',
+                            borderRadius: 4,
+                        },
+                        {
+                            label: 'Female',
+                            data: [45, 60, 35, 15, 10, 5], // Positive values = Right orientation
+                            backgroundColor: '#4CAF50',
+                            borderRadius: 4,
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y', // Switch to horizontal bar chart
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: {
+                                callback: function(value) { return Math.abs(value) + 'k'; } // Hide negative sign
+                            }
+                        },
+                        y: { stacked: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    // Custom tooltip to show absolute values
+                                    return context.dataset.label + ': ' + Math.abs(context.raw) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
             });
         }
     </script>

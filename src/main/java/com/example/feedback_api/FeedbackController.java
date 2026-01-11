@@ -30,8 +30,7 @@ public class FeedbackController {
             FeedbackReport saved = repository.save(report);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (DataAccessException ex) {
-            // DB problem (timeout / unreachable / schema) -> fallback instead of 500
-            report.setId(null); // ensure no fake id
+            report.setId(UUID.randomUUID().toString());     // generate id manually
             inMemory.add(report);
 
             Map<String, Object> res = new LinkedHashMap<>();
