@@ -62,10 +62,11 @@
         google.charts.load('current', { 'packages':['geochart'] });
         google.charts.setOnLoadCallback(initDashboard);
 
+         let demographicsChartInstance = null;
+         
         // Main initialization function executed on page load
         function initDashboard() {
             fetchDataFromAPI();      // Fetch real data
-            drawDemographicsChart(); // Draw static chart (Demographics)
         }
 
         // --- Logic for fetching data (Map + Table) ---
@@ -149,53 +150,6 @@
             });
         }
 
-        // --- Logic for Demographics Chart (Chart.js) ---
-        function drawDemographicsChart() {
-            const ctx = document.getElementById('demographicsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['15-24', '25-34', '35-44', '45-54', '55-64', '+64'],
-                    datasets: [
-                        {
-                            label: 'Male',
-                            data: [-30, -50, -40, -20, -10, -5], // Negative values = Left orientation
-                            backgroundColor: '#3F51B5',
-                            borderRadius: 4,
-                        },
-                        {
-                            label: 'Female',
-                            data: [45, 60, 35, 15, 10, 5], // Positive values = Right orientation
-                            backgroundColor: '#4CAF50',
-                            borderRadius: 4,
-                        }
-                    ]
-                },
-                options: {
-                    indexAxis: 'y', // Switch to horizontal bar chart
-                    responsive: true,
-                    scales: {
-                        x: {
-                            stacked: true,
-                            ticks: {
-                                callback: function(value) { return Math.abs(value) + 'k'; } // Hide negative sign
-                            }
-                        },
-                        y: { stacked: true }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    // Custom tooltip to show absolute values
-                                    return context.dataset.label + ': ' + Math.abs(context.raw) + 'k';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
     </script>
 </body>
 </html>
