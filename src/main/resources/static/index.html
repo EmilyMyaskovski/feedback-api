@@ -30,7 +30,7 @@
 
     <div class="chart-card">
       <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-      <div style="width: 80%; margin: 0 auto;">
+      <div style="width: 100%; max-width: 800px; margin: 0 auto;">
         <canvas id="demographicsChart"></canvas>
       </div>
     </div>
@@ -56,7 +56,6 @@
   <script>
     let demographicsChartInstance = null;
 
-    // ✅ Load Google Charts safely so we never get "google is not defined"
     function loadScript(src) {
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -96,13 +95,12 @@
           if (canDrawMap) {
             try { drawMap(data); } catch (e) { console.error('Map error:', e); }
           } else {
-            // Optional: show message if map disabled
             const el = document.getElementById('regions_div');
             if (el) el.innerHTML = '<div class="text-muted">Map unavailable (Google Charts blocked).</div>';
           }
 
           renderTable(data);
-          drawDemographicsFromFeedback(data); // ✅ graph from app runs
+          drawDemographicsFromFeedback(data); // graph from app runs
         })
         .catch(err => console.error('Error fetching data:', err));
     }
@@ -129,7 +127,7 @@
       if (!el) return;
 
       if (mapData.length === 1) {
-        el.innerHTML = '<div class="text-muted">No country data yet.</div>';
+        el.innerHTML = '<div class="text-muted text-center pt-5">No country data yet.</div>';
         return;
       }
 
@@ -179,7 +177,7 @@
       });
     }
 
-    // ---------- DEMOGRAPHICS GRAPH (FROM /api/feedback) ----------
+    // ---------- DEMOGRAPHICS GRAPH (FIXED) ----------
     function drawDemographicsFromFeedback(reports) {
       if (!window.Chart) return;
 
@@ -189,8 +187,7 @@
       const labels = ['15-24', '25-34', '35-44', '45-54', '55-64', '+64'];
       const male = [0,0,0,0,0,0];
       const female = [0,0,0,0,0,0];
-      const other = [0,0,0,0,0,0];
-
+      
       const bucketIndex = (age) => {
         const a = Number(age);
         if (!Number.isFinite(a) || a < 15) return -1;
@@ -204,14 +201,14 @@
 
       let used = 0;
       reports.forEach(r => {
-        const idx = bucketIndex(r.age); // ✅ must exist in API
-        const g = (r.gender ?? '').toString().trim().toLowerCase(); // ✅ must exist in API
+        const idx = bucketIndex(r.userAge); 
+        const g = (r.userGender ?? '').toString().trim().toLowerCase(); 
+        
         if (idx === -1 || !g) return;
 
         used++;
-        if (g === 'male' || g === 'm') male[idx]++;
-        else if (g === 'female' || g === 'f') female[idx]++;
-        else other[idx]++;
+        if (g === 'male' || g === 'm' || g === 'זכר') male[idx]++;
+        else if (g === 'female' || g === 'f' || g === 'נקבה') female[idx]++;
       });
 
       if (demographicsChartInstance) demographicsChartInstance.destroy();
@@ -221,8 +218,9 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = "16px Segoe UI";
         ctx.fillStyle = "#666";
-        ctx.fillText("No demographics yet.", 10, 30);
-        ctx.fillText("Send feedback from the app with age + gender.", 10, 55);
+        ctx.textAlign = "center";
+        ctx.fillText("No demographics data yet.", canvas.width/2, 50);
+        ctx.fillText("Send feedback with age & gender from the app.", canvas.width/2, 80);
         return;
       }
 
@@ -231,9 +229,18 @@
         data: {
           labels,
           datasets: [
-            { label: 'Male', data: male.map(x => -x) },     // left
-            { label: 'Female', data: female },              // right
-            { label: 'Other/Unknown', data: other, hidden: true }
+            { 
+                label: 'Male', 
+                data: male.map(x => -x), // Negative values for left side
+                backgroundColor: '#3F51B5', // Blue matching Android
+                borderRadius: 4
+            },    
+            { 
+                label: 'Female', 
+                data: female,
+                backgroundColor: '#4CAF50', // Green matching Android
+                borderRadius: 4
+            } 
           ]
         },
         options: {
@@ -244,7 +251,11 @@
             y: { stacked: true }
           },
           plugins: {
-            tooltip: { callbacks: { label: c => `${c.dataset.label}: ${Math.abs(c.raw)}` } }
+            tooltip: { 
+                callbacks: { 
+                    label: c => `${c.dataset.label}: ${Math.abs(c.raw)}` 
+                } 
+            }
           }
         }
       });
