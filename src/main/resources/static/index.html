@@ -1,155 +1,187 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Feedback Analytics</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    
-    <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        .header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
-        h1, h2, h3, h4 { font-weight: 700; }
-    </style>
-</head>
-<body>
+<script>
+  // 1. Initialize Google Charts (for the map)
+  google.charts.load('current', { packages: ['geochart'] });
+  google.charts.setOnLoadCallback(initDashboard);
 
-    <div class="header-bg text-center">
-        <h1>📊 Smart Feedback Portal</h1>
-        <p>Real-time User Insights & Data</p>
-    </div>
+  let demographicsChartInstance = null;
 
-    <div class="container">
-        
-        <div class="chart-card">
-            <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
-            <div id="regions_div" style="width: 100%; height: 500px;"></div>
-        </div>
+  function initDashboard() {
+    fetchDataFromAPI();
+  }
 
-        <div class="chart-card">
-            <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-            <div style="width: 80%; margin: 0 auto;">
-                <canvas id="demographicsChart"></canvas>
-            </div>
-        </div>
+  // --- Logic for fetching data (Map + Table + Demographics) ---
+  function fetchDataFromAPI() {
+    fetch('/api/feedback')
+      .then(response => response.json())
+      .then(data => {
+        drawMap(data);
+        renderTable(data);
+        drawDemographicsFromFeedback(data); // ✅ chart from app runs
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }
 
-        <div class="chart-card">
-            <h4 class="mb-3">📝 Recent User Reports</h4>
-            <table class="table table-hover table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Feature</th>
-                        <th>Rating</th>
-                        <th>Feedback</th>
-                        <th>Device</th>
-                        <th>Screenshot</th>
-                    </tr>
-                </thead>
-                <tbody id="feedbackTableBody">
-                    </tbody>
-            </table>
-        </div>
+  // Draw the map (Google GeoChart)
+  function drawMap(rawData) {
+    const countryStats = {};
+    rawData.forEach(report => {
+      const country = report.country || "Unknown";
+      const rating = report.rating || 0;
 
-    </div>
+      if (!countryStats[country]) countryStats[country] = { sum: 0, count: 0 };
+      countryStats[country].sum += rating;
+      countryStats[country].count += 1;
+    });
 
-    <script>
-        // 1. Initialize Google Charts (for the map)
-        google.charts.load('current', { 'packages':['geochart'] });
-        google.charts.setOnLoadCallback(initDashboard);
+    const mapData = [['Country', 'Average Rating']];
+    for (const [code, stats] of Object.entries(countryStats)) {
+      if (code !== "Unknown") {
+        mapData.push([code, stats.sum / stats.count]);
+      }
+    }
 
-         let demographicsChartInstance = null;
-         
-        // Main initialization function executed on page load
-        function initDashboard() {
-            fetchDataFromAPI();      // Fetch real data
-        }
+    const dataTable = google.visualization.arrayToDataTable(mapData);
+    const options = {
+      colorAxis: { minValue: 1, maxValue: 5, colors: ['#e74c3c', '#f1c40f', '#2ecc71'] },
+      backgroundColor: '#ffffff',
+      datalessRegionColor: '#eeeeee',
+      defaultColor: '#f5f5f5',
+    };
 
-        // --- Logic for fetching data (Map + Table) ---
-        function fetchDataFromAPI() {
-            fetch('/api/feedback')
-                .then(response => response.json())
-                .then(data => {
-                    drawMap(data);    // Update map
-                    renderTable(data); // Update table
-                })
-                .catch(error => console.error('Error fetching data:', error));
-        }
+    const chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+    chart.draw(dataTable, options);
+  }
 
-        // Draw the map (Google GeoChart)
-        function drawMap(rawData) {
-            const countryStats = {};
-            rawData.forEach(report => {
-                const country = report.country || "Unknown";
-                const rating = report.rating || 0;
-                
-                // Aggregate data by country
-                if (!countryStats[country]) { countryStats[country] = { sum: 0, count: 0 }; }
-                countryStats[country].sum += rating;
-                countryStats[country].count += 1;
-            });
+  // Render the data table
+  function renderTable(data) {
+    const tableBody = document.getElementById('feedbackTableBody');
+    tableBody.innerHTML = "";
 
-            const mapData = [['Country', 'Average Rating']];
-            for (const [code, stats] of Object.entries(countryStats)) {
-                if (code !== "Unknown") {
-                    const avg = stats.sum / stats.count;
-                    mapData.push([code, avg]);
-                }
+    const recentData = data.slice().reverse().slice(0, 10);
+
+    recentData.forEach(report => {
+      const stars = '⭐'.repeat(report.rating || 0);
+      let imageHtml = '<span class="text-muted">-</span>';
+
+      if (report.screenshotBase64) {
+        const src = report.screenshotBase64.startsWith('data:image')
+          ? report.screenshotBase64
+          : `data:image/jpeg;base64,${report.screenshotBase64}`;
+
+        imageHtml = `<img src="${src}" height="50" style="cursor:pointer; border:1px solid #ccc; border-radius:4px;" onclick="window.open(this.src)">`;
+      }
+
+      const row = `
+        <tr>
+          <td><small>${(report.id || '').toString().substring(0, 8)}...</small></td>
+          <td><span class="badge bg-primary">${report.featureTag || '-'}</span></td>
+          <td>${stars}</td>
+          <td>${escapeHtml(report.userText || '')}</td>
+          <td style="font-size: 0.85em; color: gray;">
+            <b>${escapeHtml(report.deviceModel || '-')}</b><br>${escapeHtml(report.osVersion || '-')}
+          </td>
+          <td>${imageHtml}</td>
+        </tr>
+      `;
+      tableBody.innerHTML += row;
+    });
+  }
+
+  // ✅ Build demographics chart ONLY from /api/feedback data (age + gender)
+  function drawDemographicsFromFeedback(reports) {
+    const canvas = document.getElementById('demographicsChart');
+    if (!canvas) return;
+
+    const labels = ['15-24', '25-34', '35-44', '45-54', '55-64', '+64'];
+
+    const male = [0, 0, 0, 0, 0, 0];
+    const female = [0, 0, 0, 0, 0, 0];
+    const other = [0, 0, 0, 0, 0, 0];
+
+    const bucketIndex = (age) => {
+      const a = Number(age);
+      if (!Number.isFinite(a)) return -1;
+      if (a < 15) return -1;
+      if (a <= 24) return 0;
+      if (a <= 34) return 1;
+      if (a <= 44) return 2;
+      if (a <= 54) return 3;
+      if (a <= 64) return 4;
+      return 5;
+    };
+
+    let used = 0;
+
+    reports.forEach(r => {
+      const idx = bucketIndex(r.age);           // expects age from SDK run
+      const g = (r.gender ?? '').toString().trim().toLowerCase(); // expects gender from SDK run
+      if (idx === -1 || !g) return;
+
+      used++;
+
+      if (g === 'male' || g === 'm') male[idx] += 1;
+      else if (g === 'female' || g === 'f') female[idx] += 1;
+      else other[idx] += 1;
+    });
+
+    // If no valid age+gender data -> show a friendly message
+    if (used === 0) {
+      if (demographicsChartInstance) demographicsChartInstance.destroy();
+      demographicsChartInstance = null;
+
+      // draw "empty" state text
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "16px Segoe UI";
+      ctx.fillStyle = "#666";
+      ctx.fillText("No demographics yet (need age + gender from app).", 10, 30);
+      ctx.fillText("Send feedback from the app including age/gender.", 10, 55);
+      return;
+    }
+
+    // Male on left (negative values), Female/Other on right (positive)
+    const maleNeg = male.map(x => -x);
+
+    if (demographicsChartInstance) demographicsChartInstance.destroy();
+
+    demographicsChartInstance = new Chart(canvas.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Male', data: maleNeg },
+          { label: 'Female', data: female },
+          { label: 'Other/Unknown', data: other, hidden: true }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        scales: {
+          x: {
+            stacked: true,
+            ticks: { callback: (v) => Math.abs(v) } // hide negative sign
+          },
+          y: { stacked: true }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (c) => `${c.dataset.label}: ${Math.abs(c.raw)}`
             }
-
-            const dataTable = google.visualization.arrayToDataTable(mapData);
-            const options = {
-                colorAxis: { minValue: 1, maxValue: 5, colors: ['#e74c3c', '#f1c40f', '#2ecc71'] },
-                backgroundColor: '#ffffff',
-                datalessRegionColor: '#eeeeee',
-                defaultColor: '#f5f5f5',
-            };
-
-            const chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
-            chart.draw(dataTable, options);
+          }
         }
+      }
+    });
+  }
 
-        // Render the data table
-        function renderTable(data) {
-            const tableBody = document.getElementById('feedbackTableBody');
-            tableBody.innerHTML = ""; 
-
-            // Show only the last 10 reports (reverse array and slice)
-            const recentData = data.slice().reverse().slice(0, 10);
-
-            recentData.forEach(report => {
-                const stars = '⭐'.repeat(report.rating);
-                let imageHtml = '<span class="text-muted">-</span>';
-                
-                if (report.screenshotBase64) {
-                    // Fix: Check if base64 string already includes prefix to avoid duplication
-                    let src = report.screenshotBase64.startsWith('data:image') 
-                        ? report.screenshotBase64 
-                        : `data:image/jpeg;base64,${report.screenshotBase64}`;
-                        
-                    imageHtml = `<img src="${src}" height="50" style="cursor:pointer; border:1px solid #ccc; border-radius:4px;" onclick="window.open(this.src)">`;
-                }
-
-                const row = `
-                    <tr>
-                        <td><small>${report.id.substring(0, 8)}...</small></td>
-                        <td><span class="badge bg-primary">${report.featureTag}</span></td>
-                        <td>${stars}</td>
-                        <td>${report.userText}</td>
-                        <td style="font-size: 0.85em; color: gray;">
-                            <b>${report.deviceModel}</b><br>${report.osVersion}
-                        </td>
-                        <td>${imageHtml}</td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        }
-
-    </script>
-</body>
-</html>
+  // Small helper: avoid HTML injection in table
+  function escapeHtml(str) {
+    return str
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+</script>
