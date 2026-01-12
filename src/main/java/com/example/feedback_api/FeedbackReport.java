@@ -30,6 +30,8 @@ public class FeedbackReport {
     private String osVersion;
     private String screenshotBase64;
     private String country;
+    private int userAge;
+    private String userGender;
     private Instant createdAt = Instant.now();
 
     public FeedbackReport() {}
@@ -60,4 +62,10 @@ public class FeedbackReport {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public int getUserAge() { return userAge; }
+    public void setUserAge(int userAge) { this.userAge = userAge; }
+
+    public String getUserGender() { return userGender; }
+    public void setUserGender(String userGender) { this.userGender = userGender; }
 }
