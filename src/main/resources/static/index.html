@@ -209,7 +209,7 @@
       }
 
         const limit = 50;
-        const displayData = dataToRender.slice(0, limit);
+        const displayData = data.slice(0, limit);
 displayData.forEach(report => {
         const stars = '⭐'.repeat(Number(report.rating) || 0);
 
@@ -236,8 +236,8 @@ displayData.forEach(report => {
         `;
       });
       
-      if (dataToRender.length > limit) {
-          tableBody.innerHTML += `<tr><td colspan="6" class="text-center text-muted"><small>Showing first ${limit} results out of ${dataToRender.length}...</small></td></tr>`;
+      if (data.length > limit) {
+          tableBody.innerHTML += `<tr><td colspan="6" class="text-center text-muted"><small>Showing first ${limit} results out of ${data.length}...</small></td></tr>`;
       }
     }
 
