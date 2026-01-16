@@ -14,21 +14,31 @@
     .header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
     h1, h2, h3, h4 { font-weight: 700; }
 
-    /*Design for the filter fields in the table*/
-.filter-input {
-    width: 100%;
-    padding: 4px 8px;
-    font-size: 13px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures that the width does not exceed */
-}
+    /* Design for the filter fields in the table */
+    .filter-input {
+        width: 100%;
+        padding: 4px 8px;
+        font-size: 13px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
 
-.filter-row th {
-    background-color: #f8f9fa;
-    padding: 5px;
-}
+    .filter-row th {
+        background-color: #f8f9fa;
+        padding: 5px;
+    }
 
+    /* Style for the empty state of the side chart */
+    .empty-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #999;
+        text-align: center;
+        flex-direction: column;
+    }
   </style>
 </head>
 
@@ -38,54 +48,78 @@
     <p>Real-time User Insights & Data</p>
   </div>
 
-  <div class="container">
-    <div class="chart-card">
-      <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
-      <div id="regions_div" style="width: 100%; height: 500px;"></div>
+  <div class="container-fluid px-4">
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="chart-card" style="height: 550px;">
+              <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
+              <div id="regions_div" style="width: 100%; height: 450px;"></div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="chart-card" style="height: 550px;">
+                <h4 class="text-center mb-3" id="countryChartTitle">Select a Country</h4>
+                <div style="height: 400px; position: relative;">
+                    <canvas id="countryChart"></canvas>
+                    <div id="countryEmptyState" class="empty-state">
+                        <div style="font-size: 3rem;">👆</div>
+                        <p>Click on a country on the map<br>to see specific rating breakdown.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="chart-card">
-      <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-      <div style="width: 100%; max-width: 800px; margin: 0 auto;">
-        <canvas id="demographicsChart"></canvas>
-      </div>
-    </div>
+    <div class="container">
+        
+        <div class="chart-card">
+        <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+        <div style="width: 100%; max-width: 800px; margin: 0 auto;">
+            <canvas id="demographicsChart"></canvas>
+        </div>
+        </div>
 
-    <div class="chart-card">
-      <h4 class="mb-3">📝 Recent User Reports</h4>
-      <table class="table table-hover table-striped">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Feature</th>
-            <th>Rating</th>
-            <th>Feedback</th>
-            <th>Device</th>
-            <th>Screenshot</th>
-          </tr>
-<tr class="filter-row">
-        <th><input type="text" id="searchId" class="filter-input" placeholder="Search ID..." onkeyup="applyFilters()"></th>
-        <th><input type="text" id="searchFeature" class="filter-input" placeholder="Filter Feature..." onkeyup="applyFilters()"></th>
-        <th>
-            <select id="searchRating" class="filter-input" onchange="applyFilters()">
-                <option value="">All</option>
-                <option value="5">⭐⭐⭐⭐⭐</option>
-                <option value="4">⭐⭐⭐⭐</option>
-                <option value="3">⭐⭐⭐</option>
-                <option value="2">⭐⭐</option>
-                <option value="1">⭐</option>
-            </select>
-        </th>
-        <th><input type="text" id="searchText" class="filter-input" placeholder="Search text..." onkeyup="applyFilters()"></th>
-        <th><input type="text" id="searchDevice" class="filter-input" placeholder="Filter Device..." onkeyup="applyFilters()"></th>
-        <th></th> </tr>
-    </thead>
-    <tbody id="feedbackTableBody"></tbody>
-  </table>
+        <div class="chart-card">
+        <h4 class="mb-3">📝 Recent User Reports</h4>
+        <table class="table table-hover table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Feature</th>
+                <th>Rating</th>
+                <th>Feedback</th>
+                <th>Device</th>
+                <th>Screenshot</th>
+            </tr>
+            <tr class="filter-row">
+                <th><input type="text" id="searchId" class="filter-input" placeholder="Search ID..." onkeyup="applyFilters()"></th>
+                <th><input type="text" id="searchFeature" class="filter-input" placeholder="Filter Feature..." onkeyup="applyFilters()"></th>
+                <th>
+                    <select id="searchRating" class="filter-input" onchange="applyFilters()">
+                        <option value="">All</option>
+                        <option value="5">⭐⭐⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                        <option value="2">⭐⭐</option>
+                        <option value="1">⭐</option>
+                    </select>
+                </th>
+                <th><input type="text" id="searchText" class="filter-input" placeholder="Search text..." onkeyup="applyFilters()"></th>
+                <th><input type="text" id="searchDevice" class="filter-input" placeholder="Filter Device..." onkeyup="applyFilters()"></th>
+                <th></th> 
+            </tr>
+            </thead>
+            <tbody id="feedbackTableBody"></tbody>
+        </table>
+        </div>
+    </div>
   </div>
-</div>
+
   <script>
     let demographicsChartInstance = null;
+    let countryChartInstance = null; // New instance for side chart
     let allFeedbackData = [];
 
     // Load Google Charts safely
@@ -160,7 +194,7 @@
         renderTable(filteredData);
     }
 
-    // ---------- MAP ----------
+    // ---------- MAP + INTERACTION ----------
     function drawMap(rawData) {
       if (!window.google || !google.visualization) return;
 
@@ -192,9 +226,77 @@
         backgroundColor: '#ffffff',
         datalessRegionColor: '#eeeeee',
         defaultColor: '#f5f5f5',
+        legend: 'none' // Cleaner look since we have the side chart
       };
 
-      new google.visualization.GeoChart(el).draw(dataTable, options);
+      const chart = new google.visualization.GeoChart(el);
+
+      // --- ADDED: Listener for clicks on countries ---
+      google.visualization.events.addListener(chart, 'select', function() {
+          const selection = chart.getSelection();
+          if (selection.length > 0) {
+              const row = selection[0].row;
+              // Get country name from column 0
+              const countryCode = dataTable.getValue(row, 0);
+              showCountryDetails(countryCode);
+          }
+      });
+
+      chart.draw(dataTable, options);
+    }
+
+    // ---------- NEW: COUNTRY SIDE CHART LOGIC ----------
+    function showCountryDetails(countryCode) {
+        // 1. Hide empty state, show title
+        document.getElementById('countryEmptyState').style.display = 'none';
+        document.getElementById('countryChartTitle').innerText = 'Ratings in: ' + countryCode;
+
+        // 2. Filter data for selected country
+        const countryReports = allFeedbackData.filter(r => r.country === countryCode);
+        
+        // 3. Count stars (1-5)
+        const counts = [0, 0, 0, 0, 0];
+        countryReports.forEach(r => {
+            const rating = Number(r.rating) || 0;
+            if (rating >= 1 && rating <= 5) {
+                counts[rating - 1]++;
+            }
+        });
+
+        // 4. Draw Chart using Chart.js
+        const ctx = document.getElementById('countryChart').getContext('2d');
+        
+        if (countryChartInstance) countryChartInstance.destroy();
+
+        countryChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1⭐', '2⭐', '3⭐', '4⭐', '5⭐'],
+                datasets: [{
+                    label: 'Count',
+                    data: counts,
+                    backgroundColor: [
+                        '#e74c3c', // Red
+                        '#e67e22', // Orange
+                        '#f1c40f', // Yellow
+                        '#2ecc71', // Light Green
+                        '#27ae60'  // Dark Green
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 } 
+                    }
+                }
+            }
+        });
     }
 
     // ---------- TABLE ----------
@@ -208,9 +310,10 @@
           return;
       }
 
-        const limit = 50;
-        const displayData = data.slice(0, limit);
-displayData.forEach(report => {
+      const limit = 50;
+      const displayData = data.slice(0, limit);
+      
+      displayData.forEach(report => {
         const stars = '⭐'.repeat(Number(report.rating) || 0);
 
         let imageHtml = '<span class="text-muted">-</span>';
