@@ -13,6 +13,22 @@
     .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
     .header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
     h1, h2, h3, h4 { font-weight: 700; }
+
+    /*Design for the filter fields in the table*/
+.filter-input {
+    width: 100%;
+    padding: 4px 8px;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensures that the width does not exceed */
+}
+
+.filter-row th {
+    background-color: #f8f9fa;
+    padding: 5px;
+}
+
   </style>
 </head>
 
@@ -47,15 +63,32 @@
             <th>Device</th>
             <th>Screenshot</th>
           </tr>
-        </thead>
-        <tbody id="feedbackTableBody"></tbody>
-      </table>
-    </div>
+<tr class="filter-row">
+        <th><input type="text" id="searchId" class="filter-input" placeholder="Search ID..." onkeyup="applyFilters()"></th>
+        <th><input type="text" id="searchFeature" class="filter-input" placeholder="Filter Feature..." onkeyup="applyFilters()"></th>
+        <th>
+            <select id="searchRating" class="filter-input" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="5">⭐⭐⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="1">⭐</option>
+            </select>
+        </th>
+        <th><input type="text" id="searchText" class="filter-input" placeholder="Search text..." onkeyup="applyFilters()"></th>
+        <th><input type="text" id="searchDevice" class="filter-input" placeholder="Filter Device..." onkeyup="applyFilters()"></th>
+        <th></th> </tr>
+    </thead>
+    <tbody id="feedbackTableBody"></tbody>
+  </table>
   </div>
-
+</div>
   <script>
     let demographicsChartInstance = null;
+    let allFeedbackData = [];
 
+    // Load Google Charts safely
     function loadScript(src) {
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -92,6 +125,7 @@
       fetch('/api/feedback')
         .then(r => r.json())
         .then(data => {
+          allFeedbackData = data.slice().reverse();
           if (canDrawMap) {
             try { drawMap(data); } catch (e) { console.error('Map error:', e); }
           } else {
@@ -99,10 +133,31 @@
             if (el) el.innerHTML = '<div class="text-muted">Map unavailable (Google Charts blocked).</div>';
           }
 
-          renderTable(data);
+          renderTable(allFeedbackData);
           drawDemographicsFromFeedback(data); // graph from app runs
         })
         .catch(err => console.error('Error fetching data:', err));
+    }
+
+    // ---------- FILTER LOGIC ----------
+    function applyFilters() {
+        const idTerm = document.getElementById('searchId').value.toLowerCase();
+        const featureTerm = document.getElementById('searchFeature').value.toLowerCase();
+        const ratingTerm = document.getElementById('searchRating').value;
+        const textTerm = document.getElementById('searchText').value.toLowerCase();
+        const deviceTerm = document.getElementById('searchDevice').value.toLowerCase();
+
+        const filteredData = allFeedbackData.filter(item => {
+            const matchesId = (item.id || '').toString().toLowerCase().includes(idTerm);
+            const matchesFeature = (item.featureTag || '').toLowerCase().includes(featureTerm);
+            const matchesText = (item.userText || '').toLowerCase().includes(textTerm);
+            const matchesDevice = ((item.deviceModel || '') + ' ' + (item.osVersion || '')).toLowerCase().includes(deviceTerm);
+            const matchesRating = ratingTerm === "" || (item.rating || 0).toString() === ratingTerm;
+
+            return matchesId && matchesFeature && matchesRating && matchesText && matchesDevice;
+        });
+
+        renderTable(filteredData);
     }
 
     // ---------- MAP ----------
@@ -146,25 +201,30 @@
     function renderTable(data) {
       const tableBody = document.getElementById('feedbackTableBody');
       if (!tableBody) return;
-
       tableBody.innerHTML = "";
-      const recentData = data.slice().reverse().slice(0, 10);
+      
+      if (dataToRender.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-3 text-muted">No matching records found</td></tr>';
+          return;
+      }
 
-      recentData.forEach(report => {
+        const limit = 50;
+        const displayData = dataToRender.slice(0, limit);
+displayData.forEach(report => {
         const stars = '⭐'.repeat(Number(report.rating) || 0);
 
         let imageHtml = '<span class="text-muted">-</span>';
         if (report.screenshotBase64) {
           const s = String(report.screenshotBase64);
           const src = s.startsWith('data:image') ? s : `data:image/jpeg;base64,${s}`;
-          imageHtml = `<img src="${src}" height="50" style="cursor:pointer; border:1px solid #ccc; border-radius:4px;" onclick="window.open(this.src)">`;
+          imageHtml = `<img src="${src}" height="40" style="cursor:pointer; border:1px solid #ccc; border-radius:4px;" onclick="window.open(this.src)">`;
         }
 
         const idStr = (report.id ?? '').toString();
 
         tableBody.innerHTML += `
           <tr>
-            <td><small>${idStr.substring(0, 8)}...</small></td>
+            <td><small title="${idStr}">${idStr.substring(0, 8)}...</small></td>
             <td><span class="badge bg-primary">${escapeHtml(report.featureTag ?? '-')}</span></td>
             <td>${stars}</td>
             <td>${escapeHtml(report.userText ?? '')}</td>
@@ -175,9 +235,13 @@
           </tr>
         `;
       });
+      
+      if (dataToRender.length > limit) {
+          tableBody.innerHTML += `<tr><td colspan="6" class="text-center text-muted"><small>Showing first ${limit} results out of ${dataToRender.length}...</small></td></tr>`;
+      }
     }
 
-    // ---------- DEMOGRAPHICS GRAPH (FIXED) ----------
+    // ---------- DEMOGRAPHICS GRAPH ----------
     function drawDemographicsFromFeedback(reports) {
       if (!window.Chart) return;
 
