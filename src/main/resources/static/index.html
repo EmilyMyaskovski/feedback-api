@@ -14,7 +14,7 @@
     .header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
     h1, h2, h3, h4 { font-weight: 700; }
 
-    /* Design for the filter fields in the table */
+    /* Filter fields design */
     .filter-input {
         width: 100%;
         padding: 4px 8px;
@@ -29,7 +29,7 @@
         padding: 5px;
     }
 
-    /* Style for the empty state of the side chart */
+    /* Empty state design */
     .empty-state {
         display: flex;
         align-items: center;
@@ -38,6 +38,15 @@
         color: #999;
         text-align: center;
         flex-direction: column;
+    }
+    
+    /* Scrollbar for the mini-table */
+    .reviews-scroll-container {
+        max-height: 250px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 5px;
     }
   </style>
 </head>
@@ -52,33 +61,44 @@
     
     <div class="row">
         <div class="col-lg-8">
-            <div class="chart-card" style="height: 550px;">
+            <div class="chart-card" style="height: 600px;">
               <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
-              <div id="regions_div" style="width: 100%; height: 450px;"></div>
+              <div id="regions_div" style="width: 100%; height: 500px;"></div>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="chart-card" style="height: 550px;">
-                <h4 class="text-center mb-3" id="countryChartTitle">Select a Country</h4>
-                <div style="height: 400px; position: relative;">
+            <div class="chart-card" style="height: 600px; display: flex; flex-direction: column;">
+                <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
+                
+                <div style="flex: 1; position: relative; min-height: 200px;">
                     <canvas id="countryChart"></canvas>
                     <div id="countryEmptyState" class="empty-state">
                         <div style="font-size: 3rem;">👆</div>
-                        <p>Click on a country on the map<br>to see specific rating breakdown.</p>
+                        <p>Click on a country on the map<br>to see details.</p>
                     </div>
                 </div>
+
+                <div id="countryReviewsSection" style="display:none; margin-top: 15px; border-top: 2px solid #f4f6f9; padding-top: 10px;">
+                    <h6 class="text-muted mb-2">Recent Feedback from this region:</h6>
+                    <div class="reviews-scroll-container">
+                        <table class="table table-sm table-hover mb-0">
+                            <tbody id="countryReviewsBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <div class="container">
-        
         <div class="chart-card">
-        <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-        <div style="width: 100%; max-width: 800px; margin: 0 auto;">
-            <canvas id="demographicsChart"></canvas>
-        </div>
+            <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+            <div style="width: 100%; max-width: 800px; margin: 0 auto;">
+                <canvas id="demographicsChart"></canvas>
+            </div>
         </div>
 
         <div class="chart-card">
@@ -119,10 +139,9 @@
 
   <script>
     let demographicsChartInstance = null;
-    let countryChartInstance = null; // New instance for side chart
+    let countryChartInstance = null;
     let allFeedbackData = [];
 
-    // Load Google Charts safely
     function loadScript(src) {
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -135,9 +154,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Always load data/table/chart. Map draws only if Google loads.
       let canDrawMap = true;
-
       try {
         if (!window.google) {
           await loadScript('https://www.gstatic.com/charts/loader.js');
@@ -145,7 +162,7 @@
         google.charts.load('current', { packages: ['geochart'] });
         google.charts.setOnLoadCallback(() => initDashboard(true));
       } catch (e) {
-        console.error('Google Charts failed (map disabled):', e);
+        console.error('Google Charts failed:', e);
         canDrawMap = false;
         initDashboard(false);
       }
@@ -163,12 +180,11 @@
           if (canDrawMap) {
             try { drawMap(data); } catch (e) { console.error('Map error:', e); }
           } else {
-            const el = document.getElementById('regions_div');
-            if (el) el.innerHTML = '<div class="text-muted">Map unavailable (Google Charts blocked).</div>';
+            document.getElementById('regions_div').innerHTML = '<div class="text-muted">Map unavailable.</div>';
           }
 
           renderTable(allFeedbackData);
-          drawDemographicsFromFeedback(data); // graph from app runs
+          drawDemographicsFromFeedback(data);
         })
         .catch(err => console.error('Error fetching data:', err));
     }
@@ -194,7 +210,7 @@
         renderTable(filteredData);
     }
 
-    // ---------- MAP + INTERACTION ----------
+    // ---------- MAP ----------
     function drawMap(rawData) {
       if (!window.google || !google.visualization) return;
 
@@ -213,30 +229,22 @@
       }
 
       const el = document.getElementById('regions_div');
-      if (!el) return;
-
-      if (mapData.length === 1) {
-        el.innerHTML = '<div class="text-muted text-center pt-5">No country data yet.</div>';
-        return;
-      }
-
+      
       const dataTable = google.visualization.arrayToDataTable(mapData);
       const options = {
         colorAxis: { minValue: 1, maxValue: 5, colors: ['#e74c3c', '#f1c40f', '#2ecc71'] },
         backgroundColor: '#ffffff',
         datalessRegionColor: '#eeeeee',
         defaultColor: '#f5f5f5',
-        legend: 'none' // Cleaner look since we have the side chart
+        legend: 'none'
       };
 
       const chart = new google.visualization.GeoChart(el);
 
-      // --- ADDED: Listener for clicks on countries ---
       google.visualization.events.addListener(chart, 'select', function() {
           const selection = chart.getSelection();
           if (selection.length > 0) {
               const row = selection[0].row;
-              // Get country name from column 0
               const countryCode = dataTable.getValue(row, 0);
               showCountryDetails(countryCode);
           }
@@ -245,27 +253,24 @@
       chart.draw(dataTable, options);
     }
 
-    // ---------- NEW: COUNTRY SIDE CHART LOGIC ----------
+    // ---------- SIDE PANEL (Chart + Table) ----------
     function showCountryDetails(countryCode) {
-        // 1. Hide empty state, show title
+        // 1. Setup UI
         document.getElementById('countryEmptyState').style.display = 'none';
+        document.getElementById('countryReviewsSection').style.display = 'block';
         document.getElementById('countryChartTitle').innerText = 'Ratings in: ' + countryCode;
 
-        // 2. Filter data for selected country
+        // 2. Filter data
         const countryReports = allFeedbackData.filter(r => r.country === countryCode);
         
-        // 3. Count stars (1-5)
+        // 3. Draw Bar Chart
         const counts = [0, 0, 0, 0, 0];
         countryReports.forEach(r => {
             const rating = Number(r.rating) || 0;
-            if (rating >= 1 && rating <= 5) {
-                counts[rating - 1]++;
-            }
+            if (rating >= 1 && rating <= 5) counts[rating - 1]++;
         });
 
-        // 4. Draw Chart using Chart.js
         const ctx = document.getElementById('countryChart').getContext('2d');
-        
         if (countryChartInstance) countryChartInstance.destroy();
 
         countryChartInstance = new Chart(ctx, {
@@ -275,13 +280,7 @@
                 datasets: [{
                     label: 'Count',
                     data: counts,
-                    backgroundColor: [
-                        '#e74c3c', // Red
-                        '#e67e22', // Orange
-                        '#f1c40f', // Yellow
-                        '#2ecc71', // Light Green
-                        '#27ae60'  // Dark Green
-                    ],
+                    backgroundColor: ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'],
                     borderWidth: 1
                 }]
             },
@@ -289,17 +288,44 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        ticks: { stepSize: 1 } 
-                    }
-                }
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
             }
         });
+
+        // 4. Fill the Mini Reviews Table
+        const reviewsBody = document.getElementById('countryReviewsBody');
+        reviewsBody.innerHTML = ''; // Clear previous
+
+        // Take last 20 reviews for this country
+        const recentCountryReviews = countryReports.slice(0, 20);
+
+        if (recentCountryReviews.length === 0) {
+             reviewsBody.innerHTML = '<tr><td class="text-muted text-center">No text reviews available.</td></tr>';
+        } else {
+            recentCountryReviews.forEach(r => {
+                const stars = '⭐'.repeat(Number(r.rating) || 0);
+                const feature = escapeHtml(r.featureTag || '-');
+                const text = escapeHtml(r.userText || '');
+                const model = escapeHtml(r.deviceModel || '');
+
+                const row = `
+                    <tr style="cursor: default;">
+                        <td>
+                            <div class="d-flex justify-content-between">
+                                <span style="font-size: 0.85em; font-weight: bold; color: #3f51b5;">${feature}</span>
+                                <span style="font-size: 0.7em;">${stars}</span>
+                            </div>
+                            <div class="mt-1" style="font-size: 0.9em;">${text}</div>
+                            <div class="text-muted mt-1" style="font-size: 0.75em;">📱 ${model}</div>
+                        </td>
+                    </tr>
+                `;
+                reviewsBody.innerHTML += row;
+            });
+        }
     }
 
-    // ---------- TABLE ----------
+    // ---------- MAIN TABLE ----------
     function renderTable(data) {
       const tableBody = document.getElementById('feedbackTableBody');
       if (!tableBody) return;
@@ -315,7 +341,6 @@
       
       displayData.forEach(report => {
         const stars = '⭐'.repeat(Number(report.rating) || 0);
-
         let imageHtml = '<span class="text-muted">-</span>';
         if (report.screenshotBase64) {
           const s = String(report.screenshotBase64);
@@ -344,10 +369,9 @@
       }
     }
 
-    // ---------- DEMOGRAPHICS GRAPH ----------
+    // ---------- DEMOGRAPHICS ----------
     function drawDemographicsFromFeedback(reports) {
       if (!window.Chart) return;
-
       const canvas = document.getElementById('demographicsChart');
       if (!canvas) return;
 
@@ -370,7 +394,6 @@
       reports.forEach(r => {
         const idx = bucketIndex(r.userAge); 
         const g = (r.userGender ?? '').toString().trim().toLowerCase(); 
-        
         if (idx === -1 || !g) return;
 
         used++;
@@ -387,7 +410,6 @@
         ctx.fillStyle = "#666";
         ctx.textAlign = "center";
         ctx.fillText("No demographics data yet.", canvas.width/2, 50);
-        ctx.fillText("Send feedback with age & gender from the app.", canvas.width/2, 80);
         return;
       }
 
@@ -396,18 +418,8 @@
         data: {
           labels,
           datasets: [
-            { 
-                label: 'Male', 
-                data: male.map(x => -x), // Negative values for left side
-                backgroundColor: '#3F51B5', // Blue matching Android
-                borderRadius: 4
-            },    
-            { 
-                label: 'Female', 
-                data: female,
-                backgroundColor: '#4CAF50', // Green matching Android
-                borderRadius: 4
-            } 
+            { label: 'Male', data: male.map(x => -x), backgroundColor: '#3F51B5', borderRadius: 4 },    
+            { label: 'Female', data: female, backgroundColor: '#4CAF50', borderRadius: 4 } 
           ]
         },
         options: {
@@ -418,11 +430,7 @@
             y: { stacked: true }
           },
           plugins: {
-            tooltip: { 
-                callbacks: { 
-                    label: c => `${c.dataset.label}: ${Math.abs(c.raw)}` 
-                } 
-            }
+            tooltip: { callbacks: { label: c => `${c.dataset.label}: ${Math.abs(c.raw)}` } }
           }
         }
       });
