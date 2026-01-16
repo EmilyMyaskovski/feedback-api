@@ -203,7 +203,7 @@
       if (!tableBody) return;
       tableBody.innerHTML = "";
       
-      if (dataToRender.length === 0) {
+      if (!Array.isArray(data) || data.length === 0) {
           tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-3 text-muted">No matching records found</td></tr>';
           return;
       }
