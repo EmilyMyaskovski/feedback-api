@@ -19,9 +19,8 @@
 
   <div class="container-fluid px-4 mb-5">
 
-    <!-- ================= ROW 1 ================= -->
+    <!-- ================= ROW 1 (2 CARDS) ================= -->
     <div class="row g-4 mb-4">
-
       <!-- MAP -->
       <div class="col-lg-8">
         <div class="chart-card" style="height: 700px;">
@@ -30,59 +29,9 @@
         </div>
       </div>
 
-      <!-- INSPECTOR -->
+      <!-- SELECT A COUNTRY -->
       <div class="col-lg-4">
-        <div class="chart-card" style="height: 700px; overflow:auto;" id="reviewInspector" style="display:none; border-left: 5px solid #3f51b5;">
-          
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4 class="mb-0 fs-5">🔍 Review Details</h4>
-            <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
-          </div>
-
-          <div id="inspectorImageContainer" class="text-center">
-            <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
-            <div id="inspectorNoImage" class="text-muted p-3 small inspector-no-image" style="display:none;">
-              🚫 No Screenshot Available
-            </div>
-          </div>
-
-          <div>
-            <div class="d-flex align-items-center mb-2">
-              <span id="inspectorRating" class="me-2 fs-5"></span>
-              <span id="inspectorFeature" class="badge bg-primary"></span>
-            </div>
-
-            <div class="inspector-text-scroll">
-              <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
-            </div>
-
-            <div class="text-muted small">
-              <strong>Device:</strong> <span id="inspectorDevice"></span><br>
-              <strong>ID:</strong> <span id="inspectorId"></span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ================= ROW 2 ================= -->
-    <div class="row g-4 mb-4">
-
-      <!-- DEMOGRAPHICS -->
-      <div class="col-lg-6">
-        <div class="chart-card" style="height: 500px;">
-          <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-          <div style="width: 100%; height: 100%; position: relative;">
-            <canvas id="demographicsChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- SELECT COUNTRY -->
-      <div class="col-lg-6">
-        <div class="chart-card country-card" style="height: 500px;">
-
+        <div class="chart-card country-card" style="height: 700px;">
           <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
 
           <div class="country-chart-area">
@@ -90,9 +39,7 @@
 
             <div id="countryEmptyState" class="empty-state">
               <div class="empty-emoji">👆</div>
-              <p class="empty-caption">
-                Click on a country on the map<br>to see details.
-              </p>
+              <p class="empty-caption">Click on a country on the map<br>to see details.</p>
             </div>
           </div>
 
@@ -104,17 +51,25 @@
               </table>
             </div>
           </div>
-
         </div>
       </div>
     </div>
 
-    <!-- ================= ROW 3 ================= -->
+    <!-- ================= ROW 2 (2 CARDS) ================= -->
     <div class="row g-4">
+      <!-- DEMOGRAPHICS -->
+      <div class="col-lg-6">
+        <div class="chart-card" style="height: 500px;">
+          <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+          <div style="width: 100%; height: 100%; position: relative;">
+            <canvas id="demographicsChart"></canvas>
+          </div>
+        </div>
+      </div>
 
-      <!-- RECENT REPORTS FULL WIDTH -->
-      <div class="col-12">
-        <div class="chart-card" style="height: 520px;">
+      <!-- RECENT REPORTS -->
+      <div class="col-lg-6">
+        <div class="chart-card" style="height: 500px;">
           <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
           <div class="table-scroll-container">
             <table class="table table-hover table-striped mb-0">
@@ -152,6 +107,37 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- ================= FLOATING INSPECTOR (OVERLAY) ================= -->
+  <div id="reviewInspector" class="inspector-panel" style="display:none;">
+    <div class="inspector-header">
+      <h4 class="mb-0 fs-5">🔍 Review Details</h4>
+      <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
+    </div>
+
+    <div id="inspectorImageContainer" class="text-center">
+      <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
+      <div id="inspectorNoImage" class="text-muted p-3 small inspector-no-image" style="display:none;">
+        🚫 No Screenshot Available
+      </div>
+    </div>
+
+    <div class="mt-2">
+      <div class="d-flex align-items-center mb-2">
+        <span id="inspectorRating" class="me-2 fs-5"></span>
+        <span id="inspectorFeature" class="badge bg-primary"></span>
+      </div>
+
+      <div class="inspector-text-scroll">
+        <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
+      </div>
+
+      <div class="text-muted small">
+        <strong>Device:</strong> <span id="inspectorDevice"></span><br>
+        <strong>ID:</strong> <span id="inspectorId"></span>
+      </div>
+    </div>
   </div>
 
   <script>
