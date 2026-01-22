@@ -41,16 +41,18 @@
         padding: 5px;
     }
 
-    /* Empty state design */
+    /* --- תיקון לבעיית הגלישה --- */
     .empty-state {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100%;
-        min-height: 150px; /* Ensure minimum height for visibility */
+        flex-grow: 1; /* תופס את המקום הפנוי */
+        min-height: 150px;
         color: #999;
         text-align: center;
         flex-direction: column;
+        padding: 15px; /* הוספת ריפוד */
+        overflow: hidden; /* מניעת גלישה */
     }
     
     /* Scrollbars */
@@ -61,7 +63,7 @@
         padding: 5px;
     }
     .reviews-scroll-container { max-height: 250px; }
-    .table-scroll-container { flex-grow: 1; overflow-y: auto; } /* Let table fill remaining space */
+    .table-scroll-container { flex-grow: 1; overflow-y: auto; }
 
     /* Clickable rows */
     .clickable-row {
@@ -78,14 +80,14 @@
         border-radius: 8px;
         border: 1px solid #ddd;
         margin-bottom: 10px;
-        max-height: 200px; /* Reduced height to save space */
+        max-height: 200px;
         object-fit: contain;
         background-color: #000;
     }
     
     /* Inspector Scrollable Text Area */
     .inspector-text-scroll {
-        max-height: 150px; /* FIXED HEIGHT FOR SCROLL */
+        max-height: 150px;
         overflow-y: auto;
         background: #f8f9fa; 
         padding: 10px; 
@@ -99,13 +101,12 @@
         display: flex;
         flex-direction: column;
         height: 100%;
-        gap: 20px; /* Space between cards */
+        gap: 20px;
     }
     
-    /* Reset height for specific cards that shouldn't force 100% in nested contexts */
     .auto-height-card {
         height: auto !important;
-        flex-shrink: 0; /* Don't shrink this card */
+        flex-shrink: 0;
     }
   </style>
 </head>
@@ -127,7 +128,9 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="flex-card-container" style="height: 700px;"> <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
+            <div class="flex-card-container" style="height: 700px;">
+                
+                <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h4 class="mb-0 fs-5">🔍 Review Details</h4>
                         <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
@@ -160,12 +163,12 @@
                 <div class="chart-card flex-grow-1" style="min-height: 250px;"> 
                     <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
                     
-                    <div style="flex: 1; position: relative; min-height: 150px; display: flex; flex-direction: column;">
-                        <canvas id="countryChart" style="flex: 1;"></canvas>
+                    <div style="flex: 1; position: relative; min-height: 200px; display: flex; flex-direction: column; justify-content: center;">
+                        <canvas id="countryChart" style="flex: 1; display: none;"></canvas>
                         
                         <div id="countryEmptyState" class="empty-state">
-                            <div style="font-size: 3rem;">👆</div>
-                            <p>Click on a country on the map<br>to see details.</p>
+                            <div style="font-size: 3rem; line-height: 1;">👆</div>
+                            <p class="mt-2 mb-0">Click on a country on the map<br>to see details.</p>
                         </div>
                     </div>
 
@@ -386,7 +389,9 @@
 
     // ---------- SIDE PANEL ----------
     function showCountryDetails(countryCode) {
+        // 1. Setup UI - Hide empty state, show chart canvas
         document.getElementById('countryEmptyState').style.display = 'none';
+        document.getElementById('countryChart').style.display = 'block';
         document.getElementById('countryReviewsSection').style.display = 'block';
         document.getElementById('countryChartTitle').innerText = 'Ratings in: ' + countryCode;
 
