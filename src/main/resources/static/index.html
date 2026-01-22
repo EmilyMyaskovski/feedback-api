@@ -48,6 +48,26 @@
         border-radius: 8px;
         padding: 5px;
     }
+
+    /* Clickable rows */
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .clickable-row:hover {
+        background-color: #e8eaf6 !important; /* Light blue hover */
+    }
+
+    /* Inspector Image */
+    .inspector-img {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+        max-height: 300px;
+        object-fit: contain;
+        background-color: #000;
+    }
   </style>
 </head>
 
@@ -61,14 +81,41 @@
     
     <div class="row">
         <div class="col-lg-8">
-            <div class="chart-card" style="height: 600px;">
+            <div class="chart-card" style="height: 700px;">
               <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
-              <div id="regions_div" style="width: 100%; height: 500px;"></div>
+              <div id="regions_div" style="width: 100%; height: 600px;"></div>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="chart-card" style="height: 600px; display: flex; flex-direction: column;">
+            
+            <div id="reviewInspector" class="chart-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">🔍 Review Details</h4>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
+                </div>
+                
+                <div id="inspectorImageContainer" class="text-center">
+                    <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
+                    <div id="inspectorNoImage" class="text-muted p-4" style="display:none; background:#f9f9f9; border-radius:8px; margin-bottom:15px;">
+                        🚫 No Screenshot Available
+                    </div>
+                </div>
+
+                <div>
+                    <span id="inspectorRating" class="fs-4"></span>
+                    <h5 id="inspectorFeature" class="badge bg-primary fs-6 mb-2"></h5>
+                    <p id="inspectorText" class="lead" style="font-size: 1.1rem; background: #f8f9fa; padding: 10px; border-radius: 5px;"></p>
+                    
+                    <hr>
+                    <small class="text-muted">
+                        <strong>Device:</strong> <span id="inspectorDevice"></span><br>
+                        <strong>ID:</strong> <span id="inspectorId"></span>
+                    </small>
+                </div>
+            </div>
+
+            <div class="chart-card" style="min-height: 400px; display: flex; flex-direction: column;">
                 <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
                 
                 <div style="flex: 1; position: relative; min-height: 200px;">
@@ -80,11 +127,10 @@
                 </div>
 
                 <div id="countryReviewsSection" style="display:none; margin-top: 15px; border-top: 2px solid #f4f6f9; padding-top: 10px;">
-                    <h6 class="text-muted mb-2">Recent Feedback from this region:</h6>
+                    <h6 class="text-muted mb-2">Click a review to inspect:</h6>
                     <div class="reviews-scroll-container">
                         <table class="table table-sm table-hover mb-0">
-                            <tbody id="countryReviewsBody">
-                                </tbody>
+                            <tbody id="countryReviewsBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -102,7 +148,7 @@
         </div>
 
         <div class="chart-card">
-        <h4 class="mb-3">📝 Recent User Reports</h4>
+        <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
         <table class="table table-hover table-striped">
             <thead>
             <tr>
@@ -189,6 +235,46 @@
         .catch(err => console.error('Error fetching data:', err));
     }
 
+    // ---------- NEW: REVIEW INSPECTOR LOGIC ----------
+    function openReview(id) {
+        // 1. Find the review object
+        const report = allFeedbackData.find(item => item.id === id);
+        if (!report) return;
+
+        // 2. Populate Data
+        document.getElementById('inspectorId').innerText = report.id;
+        document.getElementById('inspectorText').innerText = report.userText || "No text provided.";
+        document.getElementById('inspectorFeature').innerText = report.featureTag;
+        document.getElementById('inspectorRating').innerText = '⭐'.repeat(report.rating);
+        document.getElementById('inspectorDevice').innerText = (report.deviceModel || '-') + ' (' + (report.osVersion || '-') + ')';
+
+        // 3. Handle Image
+        const imgEl = document.getElementById('inspectorImg');
+        const noImgEl = document.getElementById('inspectorNoImage');
+        
+        if (report.screenshotBase64 && report.screenshotBase64.length > 100) {
+            let src = report.screenshotBase64;
+            if (!src.startsWith('data:image')) {
+                src = `data:image/jpeg;base64,${src}`;
+            }
+            imgEl.src = src;
+            imgEl.style.display = 'block';
+            noImgEl.style.display = 'none';
+        } else {
+            imgEl.style.display = 'none';
+            noImgEl.style.display = 'block';
+        }
+
+        // 4. Show Inspector and scroll to it
+        const inspector = document.getElementById('reviewInspector');
+        inspector.style.display = 'block';
+        inspector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function closeInspector() {
+        document.getElementById('reviewInspector').style.display = 'none';
+    }
+
     // ---------- FILTER LOGIC ----------
     function applyFilters() {
         const idTerm = document.getElementById('searchId').value.toLowerCase();
@@ -253,17 +339,14 @@
       chart.draw(dataTable, options);
     }
 
-    // ---------- SIDE PANEL (Chart + Table) ----------
+    // ---------- SIDE PANEL ----------
     function showCountryDetails(countryCode) {
-        // 1. Setup UI
         document.getElementById('countryEmptyState').style.display = 'none';
         document.getElementById('countryReviewsSection').style.display = 'block';
         document.getElementById('countryChartTitle').innerText = 'Ratings in: ' + countryCode;
 
-        // 2. Filter data
         const countryReports = allFeedbackData.filter(r => r.country === countryCode);
         
-        // 3. Draw Bar Chart
         const counts = [0, 0, 0, 0, 0];
         countryReports.forEach(r => {
             const rating = Number(r.rating) || 0;
@@ -292,11 +375,9 @@
             }
         });
 
-        // 4. Fill the Mini Reviews Table
+        // Fill Mini Reviews Table
         const reviewsBody = document.getElementById('countryReviewsBody');
-        reviewsBody.innerHTML = ''; // Clear previous
-
-        // Take last 20 reviews for this country
+        reviewsBody.innerHTML = ''; 
         const recentCountryReviews = countryReports.slice(0, 20);
 
         if (recentCountryReviews.length === 0) {
@@ -306,17 +387,16 @@
                 const stars = '⭐'.repeat(Number(r.rating) || 0);
                 const feature = escapeHtml(r.featureTag || '-');
                 const text = escapeHtml(r.userText || '');
-                const model = escapeHtml(r.deviceModel || '');
-
+                
+                // Add onclick to these rows too!
                 const row = `
-                    <tr style="cursor: default;">
+                    <tr class="clickable-row" onclick="openReview('${r.id}')">
                         <td>
                             <div class="d-flex justify-content-between">
                                 <span style="font-size: 0.85em; font-weight: bold; color: #3f51b5;">${feature}</span>
                                 <span style="font-size: 0.7em;">${stars}</span>
                             </div>
-                            <div class="mt-1" style="font-size: 0.9em;">${text}</div>
-                            <div class="text-muted mt-1" style="font-size: 0.75em;">📱 ${model}</div>
+                            <div class="mt-1 text-truncate" style="max-width: 200px; font-size: 0.9em;">${text}</div>
                         </td>
                     </tr>
                 `;
@@ -343,15 +423,14 @@
         const stars = '⭐'.repeat(Number(report.rating) || 0);
         let imageHtml = '<span class="text-muted">-</span>';
         if (report.screenshotBase64) {
-          const s = String(report.screenshotBase64);
-          const src = s.startsWith('data:image') ? s : `data:image/jpeg;base64,${s}`;
-          imageHtml = `<img src="${src}" height="40" style="cursor:pointer; border:1px solid #ccc; border-radius:4px;" onclick="window.open(this.src)">`;
+            imageHtml = `<span style="font-size:1.2rem;">📷</span>`;
         }
 
         const idStr = (report.id ?? '').toString();
 
+        // Add onclick event here
         tableBody.innerHTML += `
-          <tr>
+          <tr class="clickable-row" onclick="openReview('${report.id}')">
             <td><small title="${idStr}">${idStr.substring(0, 8)}...</small></td>
             <td><span class="badge bg-primary">${escapeHtml(report.featureTag ?? '-')}</span></td>
             <td>${stars}</td>
