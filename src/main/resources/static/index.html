@@ -10,7 +10,19 @@
 
   <style>
     body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 0; /* Removed bottom margin for grid */ height: 100%; /* Make cards fill container height */ }
+    
+    /* Updated: Cards fill height but respect content */
+    .chart-card { 
+        background: white; 
+        padding: 20px; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+        margin-bottom: 0; 
+        height: 100%; 
+        display: flex;       /* Added flex to handle internal layout */
+        flex-direction: column; 
+    }
+    
     .header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
     h1, h2, h3, h4 { font-weight: 700; }
 
@@ -35,12 +47,13 @@
         align-items: center;
         justify-content: center;
         height: 100%;
+        min-height: 150px; /* Ensure minimum height for visibility */
         color: #999;
         text-align: center;
         flex-direction: column;
     }
     
-    /* Scrollbar for the mini-table and main table */
+    /* Scrollbars */
     .reviews-scroll-container, .table-scroll-container {
         overflow-y: auto;
         border: 1px solid #eee;
@@ -48,7 +61,7 @@
         padding: 5px;
     }
     .reviews-scroll-container { max-height: 250px; }
-    .table-scroll-container { max-height: 400px; /* Adjust height for main table */ }
+    .table-scroll-container { flex-grow: 1; overflow-y: auto; } /* Let table fill remaining space */
 
     /* Clickable rows */
     .clickable-row {
@@ -56,7 +69,7 @@
         transition: background-color 0.2s;
     }
     .clickable-row:hover {
-        background-color: #e8eaf6 !important; /* Light blue hover */
+        background-color: #e8eaf6 !important;
     }
 
     /* Inspector Image */
@@ -64,17 +77,35 @@
         width: 100%;
         border-radius: 8px;
         border: 1px solid #ddd;
-        margin-bottom: 15px;
-        max-height: 300px;
+        margin-bottom: 10px;
+        max-height: 200px; /* Reduced height to save space */
         object-fit: contain;
         background-color: #000;
     }
+    
+    /* Inspector Scrollable Text Area */
+    .inspector-text-scroll {
+        max-height: 150px; /* FIXED HEIGHT FOR SCROLL */
+        overflow-y: auto;
+        background: #f8f9fa; 
+        padding: 10px; 
+        border-radius: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #eee;
+    }
 
-    /* Flex container to align cards in row 2 */
+    /* Flex container for right column */
     .flex-card-container {
         display: flex;
         flex-direction: column;
         height: 100%;
+        gap: 20px; /* Space between cards */
+    }
+    
+    /* Reset height for specific cards that shouldn't force 100% in nested contexts */
+    .auto-height-card {
+        height: auto !important;
+        flex-shrink: 0; /* Don't shrink this card */
     }
   </style>
 </head>
@@ -85,54 +116,62 @@
     <p>Real-time User Insights & Data</p>
   </div>
 
-  <div class="container-fluid px-4 mb-5"> <div class="row g-4 mb-4"> <div class="col-lg-8">
+  <div class="container-fluid px-4 mb-5">
+    
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
             <div class="chart-card" style="height: 700px;">
               <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
-              <div id="regions_div" style="width: 100%; height: 600px;"></div>
+              <div id="regions_div" style="width: 100%; flex-grow: 1;"></div>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="flex-card-container"> <div id="reviewInspector" class="chart-card mb-3" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff; height: auto; /* Auto height when visible */">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="mb-0">🔍 Review Details</h4>
+            <div class="flex-card-container" style="height: 700px;"> <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0 fs-5">🔍 Review Details</h4>
                         <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
                     </div>
                     
                     <div id="inspectorImageContainer" class="text-center">
                         <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
-                        <div id="inspectorNoImage" class="text-muted p-4" style="display:none; background:#f9f9f9; border-radius:8px; margin-bottom:15px;">
+                        <div id="inspectorNoImage" class="text-muted p-3 small" style="display:none; background:#f9f9f9; border-radius:8px; margin-bottom:10px;">
                             🚫 No Screenshot Available
                         </div>
                     </div>
 
                     <div>
-                        <span id="inspectorRating" class="fs-4"></span>
-                        <h5 id="inspectorFeature" class="badge bg-primary fs-6 mb-2"></h5>
-                        <p id="inspectorText" class="lead" style="font-size: 1.1rem; background: #f8f9fa; padding: 10px; border-radius: 5px;"></p>
+                        <div class="d-flex align-items-center mb-2">
+                            <span id="inspectorRating" class="me-2 fs-5"></span>
+                            <span id="inspectorFeature" class="badge bg-primary"></span>
+                        </div>
                         
-                        <hr>
-                        <small class="text-muted">
+                        <div class="inspector-text-scroll">
+                            <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
+                        </div>
+                        
+                        <div class="text-muted small">
                             <strong>Device:</strong> <span id="inspectorDevice"></span><br>
                             <strong>ID:</strong> <span id="inspectorId"></span>
-                        </small>
+                        </div>
                     </div>
                 </div>
 
-                <div class="chart-card flex-grow-1" style="display: flex; flex-direction: column; /* flex-grow-1 makes it fill remaining space */">
+                <div class="chart-card flex-grow-1" style="min-height: 250px;"> 
                     <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
                     
-                    <div style="flex: 1; position: relative; min-height: 200px;">
-                        <canvas id="countryChart"></canvas>
+                    <div style="flex: 1; position: relative; min-height: 150px; display: flex; flex-direction: column;">
+                        <canvas id="countryChart" style="flex: 1;"></canvas>
+                        
                         <div id="countryEmptyState" class="empty-state">
                             <div style="font-size: 3rem;">👆</div>
                             <p>Click on a country on the map<br>to see details.</p>
                         </div>
                     </div>
 
-                    <div id="countryReviewsSection" style="display:none; margin-top: 15px; border-top: 2px solid #f4f6f9; padding-top: 10px;">
-                        <h6 class="text-muted mb-2">Click a review to inspect:</h6>
-                        <div class="reviews-scroll-container">
+                    <div id="countryReviewsSection" style="display:none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; height: 35%;">
+                        <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
+                        <div class="reviews-scroll-container" style="height: 100%;">
                             <table class="table table-sm table-hover mb-0">
                                 <tbody id="countryReviewsBody"></tbody>
                             </table>
@@ -146,16 +185,21 @@
 
     <div class="row g-4">
         <div class="col-lg-6">
-            <div class="chart-card" style="min-height: 500px;"> <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-                <div style="width: 100%; max-width: 800px; margin: 0 auto; height: 400px;">
+            <div class="chart-card" style="height: 500px;">
+                <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+                <div style="width: 100%; height: 100%; position: relative;">
                     <canvas id="demographicsChart"></canvas>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-6">
-            <div class="chart-card" style="min-height: 500px; display: flex; flex-direction: column;"> <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
-                <div class="table-scroll-container flex-grow-1"> <table class="table table-hover table-striped mb-0"> <thead style="position: sticky; top: 0; background: white; z-index: 1;"> <tr>
+            <div class="chart-card" style="height: 500px;">
+                <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
+                <div class="table-scroll-container">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                        <tr>
                             <th>ID</th>
                             <th>Feature</th>
                             <th>Rating</th>
@@ -164,20 +208,20 @@
                             <th>Screenshot</th>
                         </tr>
                         <tr class="filter-row">
-                            <th><input type="text" id="searchId" class="filter-input" placeholder="Search ID..." onkeyup="applyFilters()"></th>
-                            <th><input type="text" id="searchFeature" class="filter-input" placeholder="Filter Feature..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchId" class="filter-input" placeholder="ID..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchFeature" class="filter-input" placeholder="Feature..." onkeyup="applyFilters()"></th>
                             <th>
                                 <select id="searchRating" class="filter-input" onchange="applyFilters()">
                                     <option value="">All</option>
-                                    <option value="5">⭐⭐⭐⭐⭐</option>
-                                    <option value="4">⭐⭐⭐⭐</option>
-                                    <option value="3">⭐⭐⭐</option>
-                                    <option value="2">⭐⭐</option>
-                                    <option value="1">⭐</option>
+                                    <option value="5">5★</option>
+                                    <option value="4">4★</option>
+                                    <option value="3">3★</option>
+                                    <option value="2">2★</option>
+                                    <option value="1">1★</option>
                                 </select>
                             </th>
-                            <th><input type="text" id="searchText" class="filter-input" placeholder="Search text..." onkeyup="applyFilters()"></th>
-                            <th><input type="text" id="searchDevice" class="filter-input" placeholder="Filter Device..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchText" class="filter-input" placeholder="Text..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchDevice" class="filter-input" placeholder="Device..." onkeyup="applyFilters()"></th>
                             <th></th> 
                         </tr>
                         </thead>
@@ -270,8 +314,6 @@
 
         const inspector = document.getElementById('reviewInspector');
         inspector.style.display = 'block';
-        // Scroll to the inspector (optional, might not be needed in new layout)
-        // inspector.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function closeInspector() {
@@ -418,7 +460,6 @@
           return;
       }
 
-      // Removed limit for main table, relying on scroll
       const displayData = data; 
       
       displayData.forEach(report => {
@@ -443,8 +484,6 @@
           </tr>
         `;
       });
-      
-      // Removed "Showing first X results" message since we use scroll now
     }
 
     // ---------- DEMOGRAPHICS ----------
@@ -503,7 +542,7 @@
         options: {
           indexAxis: 'y',
           responsive: true,
-          maintainAspectRatio: false, // Allow chart to fill container height
+          maintainAspectRatio: false,
           scales: {
             x: { stacked: true, ticks: { callback: v => Math.abs(v) } },
             y: { stacked: true }
