@@ -1,143 +1,30 @@
-/* prevent layout shift when scrollbar appears/disappears */
-html {
-  overflow-y: scroll;         /* fallback */
-  scrollbar-gutter: stable;   /* modern browsers */
-}
-
-body {
-  background-color: #f4f6f9;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Cards */
-.chart-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  height: 100%;
+/* Country card must be a flex column that can shrink properly */
+.country-card{
   display: flex;
   flex-direction: column;
-}
-
-.header-bg {
-  background-color: #3f51b5;
-  color: white;
-  padding: 40px 0;
-  margin-bottom: 30px;
-}
-
-h1, h2, h3, h4 { font-weight: 700; }
-
-/* Filters */
-.filter-input {
-  width: 100%;
-  padding: 4px 8px;
-  font-size: 13px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.filter-row th {
-  background-color: #f8f9fa;
-  padding: 5px;
-}
-
-/* Scroll containers */
-.reviews-scroll-container,
-.table-scroll-container {
-  overflow-y: auto;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 5px;
-}
-
-.reviews-scroll-container { max-height: 250px; }
-.table-scroll-container { flex-grow: 1; }
-
-/* Clickable rows */
-.clickable-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.clickable-row:hover {
-  background-color: #e8eaf6 !important;
-}
-
-/* Inspector image */
-.inspector-img {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-  height: 300px;
-  max-height: none;
-  object-fit: contain;
-  background-color: #000;
-}
-
-.inspector-no-image {
-  background: #f9f9f9;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-/* Inspector scroll area */
-.inspector-text-scroll {
-  max-height: 150px;
-  overflow-y: auto;
-  background: #f8f9fa;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  border: 1px solid #eee;
-}
-
-/* Right column layout */
-.flex-card-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 20px;
-
+  min-height: 0;
   overflow: hidden;
 }
 
-.auto-height-card {
-  height: auto !important;
-  flex-shrink: 0;
-}
-
-#reviewInspector {
-  max-height: 520px;  
-  overflow: auto;
-}
-
-/* Country card + empty-state */
-.country-card {
-  min-height: 0;      
-  overflow: hidden;   
-}
-
-/* The area that holds either empty-state OR the canvas */
-.country-chart-area {
+/* chart area always has a usable height */
+.country-chart-area{
   position: relative;
-  flex: 1;
-  min-height: 220px;     
-  overflow: hidden;  
+  height: 260px;     
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 10px;
 }
 
-/* Canvas sits in the same box */
-#countryChart {
+/* Canvas and empty state are bounded in the same box */
+#countryChart{
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  display: none; 
+  width: 100% !important;
+  height: 100% !important;
+  display: none;
 }
 
-#countryEmptyState.empty-state {
+#countryEmptyState{
   position: absolute;
   inset: 0;
   display: flex;
@@ -146,16 +33,23 @@ h1, h2, h3, h4 { font-weight: 700; }
   flex-direction: column;
   padding: 16px;
   text-align: center;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
-.empty-emoji {
-  font-size: 3rem;
-  line-height: 1;
+.empty-emoji{ font-size: 3rem; line-height: 1; }
+.empty-caption{ margin: 0; max-width: 90%; }
+
+/* Reviews section uses remaining space, scrolls when tight */
+.country-reviews{
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-.empty-caption {
-  margin: 0;
-  max-width: 85%;
-  word-break: break-word;
+.country-reviews .reviews-scroll-container{
+  height: 100%;
+  max-height: none;  
+  overflow-y: auto;
 }
