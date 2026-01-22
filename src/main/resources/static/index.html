@@ -168,18 +168,395 @@ h1,h2,h3,h4 { font-weight: 700; }
 <table class="table table-sm table-hover mb-0">
 <tbody id="countryReviewsBody"></tbody>
 </table>
-</div>
-</div>
+                        </div>
+                    </div>
 
-</div>
-</div>
-</div>
-</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- KEEP YOUR JS EXACTLY AS IT IS -->
-<script>
-/* your existing JS code here – unchanged */
-</script>
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="chart-card" style="height: 500px;">
+                <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+                <div style="width: 100%; height: 100%; position: relative;">
+                    <canvas id="demographicsChart"></canvas>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-lg-6">
+            <div class="chart-card" style="height: 500px;">
+                <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
+                <div class="table-scroll-container">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                        <tr>
+                            <th>ID</th>
+                            <th>Feature</th>
+                            <th>Rating</th>
+                            <th>Feedback</th>
+                            <th>Device</th>
+                            <th>Screenshot</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th><input type="text" id="searchId" class="filter-input" placeholder="ID..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchFeature" class="filter-input" placeholder="Feature..." onkeyup="applyFilters()"></th>
+                            <th>
+                                <select id="searchRating" class="filter-input" onchange="applyFilters()">
+                                    <option value="">All</option>
+                                    <option value="5">5★</option>
+                                    <option value="4">4★</option>
+                                    <option value="3">3★</option>
+                                    <option value="2">2★</option>
+                                    <option value="1">1★</option>
+                                </select>
+                            </th>
+                            <th><input type="text" id="searchText" class="filter-input" placeholder="Text..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchDevice" class="filter-input" placeholder="Device..." onkeyup="applyFilters()"></th>
+                            <th></th> 
+                        </tr>
+                        </thead>
+                        <tbody id="feedbackTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    let demographicsChartInstance = null;
+    let countryChartInstance = null;
+    let allFeedbackData = [];
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Failed to load: ' + src));
+        document.head.appendChild(s);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      let canDrawMap = true;
+      try {
+        if (!window.google) {
+          await loadScript('https://www.gstatic.com/charts/loader.js');
+        }
+        google.charts.load('current', { packages: ['geochart'] });
+        google.charts.setOnLoadCallback(() => initDashboard(true));
+      } catch (e) {
+        console.error('Google Charts failed:', e);
+        canDrawMap = false;
+        initDashboard(false);
+      }
+    });
+
+    function initDashboard(canDrawMap) {
+      fetchDataFromAPI(canDrawMap);
+    }
+
+    function fetchDataFromAPI(canDrawMap) {
+      fetch('/api/feedback')
+        .then(r => r.json())
+        .then(data => {
+          allFeedbackData = data.slice().reverse();
+          if (canDrawMap) {
+            try { drawMap(data); } catch (e) { console.error('Map error:', e); }
+          } else {
+            document.getElementById('regions_div').innerHTML = '<div class="text-muted">Map unavailable.</div>';
+          }
+
+          renderTable(allFeedbackData);
+          drawDemographicsFromFeedback(data);
+        })
+        .catch(err => console.error('Error fetching data:', err));
+    }
+
+    // ---------- REVIEW INSPECTOR LOGIC ----------
+    function openReview(id) {
+        const report = allFeedbackData.find(item => item.id === id);
+        if (!report) return;
+
+        document.getElementById('inspectorId').innerText = report.id;
+        document.getElementById('inspectorText').innerText = report.userText || "No text provided.";
+        document.getElementById('inspectorFeature').innerText = report.featureTag;
+        document.getElementById('inspectorRating').innerText = '⭐'.repeat(report.rating);
+        document.getElementById('inspectorDevice').innerText = (report.deviceModel || '-') + ' (' + (report.osVersion || '-') + ')';
+
+        const imgEl = document.getElementById('inspectorImg');
+        const noImgEl = document.getElementById('inspectorNoImage');
+        
+        if (report.screenshotBase64 && report.screenshotBase64.length > 100) {
+            let src = report.screenshotBase64;
+            if (!src.startsWith('data:image')) {
+                src = `data:image/jpeg;base64,${src}`;
+            }
+            imgEl.src = src;
+            imgEl.style.display = 'block';
+            noImgEl.style.display = 'none';
+        } else {
+            imgEl.style.display = 'none';
+            noImgEl.style.display = 'block';
+        }
+
+        const inspector = document.getElementById('reviewInspector');
+        inspector.style.display = 'block';
+    }
+
+    function closeInspector() {
+        document.getElementById('reviewInspector').style.display = 'none';
+    }
+
+    // ---------- FILTER LOGIC ----------
+    function applyFilters() {
+        const idTerm = document.getElementById('searchId').value.toLowerCase();
+        const featureTerm = document.getElementById('searchFeature').value.toLowerCase();
+        const ratingTerm = document.getElementById('searchRating').value;
+        const textTerm = document.getElementById('searchText').value.toLowerCase();
+        const deviceTerm = document.getElementById('searchDevice').value.toLowerCase();
+
+        const filteredData = allFeedbackData.filter(item => {
+            const matchesId = (item.id || '').toString().toLowerCase().includes(idTerm);
+            const matchesFeature = (item.featureTag || '').toLowerCase().includes(featureTerm);
+            const matchesText = (item.userText || '').toLowerCase().includes(textTerm);
+            const matchesDevice = ((item.deviceModel || '') + ' ' + (item.osVersion || '')).toLowerCase().includes(deviceTerm);
+            const matchesRating = ratingTerm === "" || (item.rating || 0).toString() === ratingTerm;
+
+            return matchesId && matchesFeature && matchesRating && matchesText && matchesDevice;
+        });
+
+        renderTable(filteredData);
+    }
+
+    // ---------- MAP ----------
+    function drawMap(rawData) {
+      if (!window.google || !google.visualization) return;
+
+      const countryStats = {};
+      rawData.forEach(r => {
+        const country = r.country || "Unknown";
+        const rating = Number(r.rating) || 0;
+        if (!countryStats[country]) countryStats[country] = { sum: 0, count: 0 };
+        countryStats[country].sum += rating;
+        countryStats[country].count += 1;
+      });
+
+      const mapData = [['Country', 'Average Rating']];
+      for (const [code, stats] of Object.entries(countryStats)) {
+        if (code !== "Unknown" && stats.count > 0) mapData.push([code, stats.sum / stats.count]);
+      }
+
+      const el = document.getElementById('regions_div');
+      
+      const dataTable = google.visualization.arrayToDataTable(mapData);
+      const options = {
+        colorAxis: { minValue: 1, maxValue: 5, colors: ['#e74c3c', '#f1c40f', '#2ecc71'] },
+        backgroundColor: '#ffffff',
+        datalessRegionColor: '#eeeeee',
+        defaultColor: '#f5f5f5',
+        legend: 'none'
+      };
+
+      const chart = new google.visualization.GeoChart(el);
+
+      google.visualization.events.addListener(chart, 'select', function() {
+          const selection = chart.getSelection();
+          if (selection.length > 0) {
+              const row = selection[0].row;
+              const countryCode = dataTable.getValue(row, 0);
+              showCountryDetails(countryCode);
+          }
+      });
+
+      chart.draw(dataTable, options);
+    }
+
+    // ---------- SIDE PANEL ----------
+    function showCountryDetails(countryCode) {
+        // 1. Setup UI - Hide empty state, show chart canvas
+        document.getElementById('countryEmptyState').style.display = 'none';
+        document.getElementById('countryChart').style.display = 'block';
+        document.getElementById('countryReviewsSection').style.display = 'block';
+        document.getElementById('countryChartTitle').innerText = 'Ratings in: ' + countryCode;
+
+        const countryReports = allFeedbackData.filter(r => r.country === countryCode);
+        
+        const counts = [0, 0, 0, 0, 0];
+        countryReports.forEach(r => {
+            const rating = Number(r.rating) || 0;
+            if (rating >= 1 && rating <= 5) counts[rating - 1]++;
+        });
+
+        const ctx = document.getElementById('countryChart').getContext('2d');
+        if (countryChartInstance) countryChartInstance.destroy();
+
+        countryChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1⭐', '2⭐', '3⭐', '4⭐', '5⭐'],
+                datasets: [{
+                    label: 'Count',
+                    data: counts,
+                    backgroundColor: ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        // Fill Mini Reviews Table
+        const reviewsBody = document.getElementById('countryReviewsBody');
+        reviewsBody.innerHTML = ''; 
+        const recentCountryReviews = countryReports.slice(0, 20);
+
+        if (recentCountryReviews.length === 0) {
+             reviewsBody.innerHTML = '<tr><td class="text-muted text-center">No text reviews available.</td></tr>';
+        } else {
+            recentCountryReviews.forEach(r => {
+                const stars = '⭐'.repeat(Number(r.rating) || 0);
+                const feature = escapeHtml(r.featureTag || '-');
+                const text = escapeHtml(r.userText || '');
+                
+                const row = `
+                    <tr class="clickable-row" onclick="openReview('${r.id}')">
+                        <td>
+                            <div class="d-flex justify-content-between">
+                                <span style="font-size: 0.85em; font-weight: bold; color: #3f51b5;">${feature}</span>
+                                <span style="font-size: 0.7em;">${stars}</span>
+                            </div>
+                            <div class="mt-1 text-truncate" style="max-width: 200px; font-size: 0.9em;">${text}</div>
+                        </td>
+                    </tr>
+                `;
+                reviewsBody.innerHTML += row;
+            });
+        }
+    }
+
+    // ---------- MAIN TABLE ----------
+    function renderTable(data) {
+      const tableBody = document.getElementById('feedbackTableBody');
+      if (!tableBody) return;
+      tableBody.innerHTML = "";
+      
+      if (!Array.isArray(data) || data.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-3 text-muted">No matching records found</td></tr>';
+          return;
+      }
+
+      const displayData = data; 
+      
+      displayData.forEach(report => {
+        const stars = '⭐'.repeat(Number(report.rating) || 0);
+        let imageHtml = '<span class="text-muted">-</span>';
+        if (report.screenshotBase64) {
+            imageHtml = `<span style="font-size:1.2rem;">📷</span>`;
+        }
+
+        const idStr = (report.id ?? '').toString();
+
+        tableBody.innerHTML += `
+          <tr class="clickable-row" onclick="openReview('${report.id}')">
+            <td><small title="${idStr}">${idStr.substring(0, 8)}...</small></td>
+            <td><span class="badge bg-primary">${escapeHtml(report.featureTag ?? '-')}</span></td>
+            <td>${stars}</td>
+            <td>${escapeHtml(report.userText ?? '')}</td>
+            <td style="font-size: 0.85em; color: gray;">
+              <b>${escapeHtml(report.deviceModel ?? '-')}</b><br>${escapeHtml(report.osVersion ?? '-')}
+            </td>
+            <td>${imageHtml}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // ---------- DEMOGRAPHICS ----------
+    function drawDemographicsFromFeedback(reports) {
+      if (!window.Chart) return;
+      const canvas = document.getElementById('demographicsChart');
+      if (!canvas) return;
+
+      const labels = ['15-24', '25-34', '35-44', '45-54', '55-64', '+64'];
+      const male = [0,0,0,0,0,0];
+      const female = [0,0,0,0,0,0];
+      
+      const bucketIndex = (age) => {
+        const a = Number(age);
+        if (!Number.isFinite(a) || a < 15) return -1;
+        if (a <= 24) return 0;
+        if (a <= 34) return 1;
+        if (a <= 44) return 2;
+        if (a <= 54) return 3;
+        if (a <= 64) return 4;
+        return 5;
+      };
+
+      let used = 0;
+      reports.forEach(r => {
+        const idx = bucketIndex(r.userAge); 
+        const g = (r.userGender ?? '').toString().trim().toLowerCase(); 
+        if (idx === -1 || !g) return;
+
+        used++;
+        if (g === 'male' || g === 'm' || g === 'זכר') male[idx]++;
+        else if (g === 'female' || g === 'f' || g === 'נקבה') female[idx]++;
+      });
+
+      if (demographicsChartInstance) demographicsChartInstance.destroy();
+
+      if (used === 0) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = "16px Segoe UI";
+        ctx.fillStyle = "#666";
+        ctx.textAlign = "center";
+        ctx.fillText("No demographics data yet.", canvas.width/2, 50);
+        return;
+      }
+
+      demographicsChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Male', data: male.map(x => -x), backgroundColor: '#3F51B5', borderRadius: 4 },    
+            { label: 'Female', data: female, backgroundColor: '#4CAF50', borderRadius: 4 } 
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true, ticks: { callback: v => Math.abs(v) } },
+            y: { stacked: true }
+          },
+          plugins: {
+            tooltip: { callbacks: { label: c => `${c.dataset.label}: ${Math.abs(c.raw)}` } }
+          }
+        }
+      });
+    }
+
+    function escapeHtml(str) {
+      return (str ?? '').toString()
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+  </script>
 </body>
 </html>
