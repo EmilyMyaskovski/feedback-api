@@ -1,229 +1,144 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Feedback Analytics</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Feedback Analytics</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 
-<style>
-/* ===== GLOBAL FIX FOR SLIDING ===== */
-html {
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
-}
-
-body {
-  background-color: #f4f6f9;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Cards */
-.chart-card { 
-  background: white; 
-  padding: 20px; 
-  border-radius: 12px; 
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-  height: 100%; 
-  display: flex;
-  flex-direction: column;
-}
-
-.header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
-h1,h2,h3,h4 { font-weight: 700; }
-
-/* Filters */
-.filter-input {
-  width: 100%;
-  padding: 4px 8px;
-  font-size: 13px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.filter-row th { background-color: #f8f9fa; padding: 5px; }
-
-/* Empty state (LOCKED) */
-.country-chart-area {
-  position: relative;
-  flex: 1;
-  min-height: 220px;
-}
-
-.empty-state {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  color: #999;
-  text-align: center;
-  padding: 15px;
-  overflow: hidden;
-}
-
-#countryChart {
-  position: absolute;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
-  display: none;
-}
-
-/* Scroll */
-.reviews-scroll-container, .table-scroll-container {
-  overflow-y: auto;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 5px;
-}
-.reviews-scroll-container { max-height: 250px; }
-.table-scroll-container { flex-grow: 1; }
-
-/* Rows */
-.clickable-row { cursor: pointer; transition: 0.2s; }
-.clickable-row:hover { background-color: #e8eaf6 !important; }
-
-/* Inspector */
-.inspector-img {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-  max-height: 200px;
-  object-fit: contain;
-  background-color: #000;
-}
-
-.inspector-text-scroll {
-  max-height: 150px;
-  overflow-y: auto;
-  background: #f8f9fa; 
-  padding: 10px; 
-  border-radius: 5px;
-  margin-bottom: 10px;
-  border: 1px solid #eee;
-}
-
-/* Right column */
-.flex-card-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 20px;
-}
-.auto-height-card { height: auto !important; flex-shrink: 0; }
-</style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
+  <div class="header-bg text-center">
+    <h1>📊 Smart Feedback Portal</h1>
+    <p>Real-time User Insights & Data</p>
+  </div>
 
-<div class="header-bg text-center">
-  <h1>📊 Smart Feedback Portal</h1>
-  <p>Real-time User Insights & Data</p>
-</div>
+  <div class="container-fluid px-4 mb-5">
 
-<div class="container-fluid px-4 mb-5">
-
-<div class="row g-4 mb-4">
-<div class="col-lg-8">
-<div class="chart-card" style="height:700px">
-<h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
-<div id="regions_div" style="flex:1"></div>
-</div>
-</div>
-
-<div class="col-lg-4">
-<div class="flex-card-container" style="height:700px">
-
-<!-- INSPECTOR -->
-<div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left:5px solid #3f51b5">
-<button class="btn btn-sm btn-outline-secondary align-self-end mb-2" onclick="closeInspector()">Close</button>
-<img id="inspectorImg" class="inspector-img">
-<div id="inspectorNoImage" class="text-muted small mb-2" style="display:none">🚫 No Screenshot</div>
-<div class="inspector-text-scroll"><p id="inspectorText" class="mb-0"></p></div>
-<div class="small text-muted"><b>Device:</b> <span id="inspectorDevice"></span><br><b>ID:</b> <span id="inspectorId"></span></div>
-</div>
-
-<!-- COUNTRY -->
-<div class="chart-card flex-grow-1">
-
-<h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
-
-<div class="country-chart-area">
-<canvas id="countryChart"></canvas>
-
-<div id="countryEmptyState" class="empty-state">
-<div style="font-size:3rem">👆</div>
-<p class="mt-2 mb-0">Click on a country on the map<br>to see details.</p>
-</div>
-</div>
-
-<div id="countryReviewsSection" style="display:none; margin-top:10px; border-top:1px solid #eee; padding-top:10px; height:35%">
-<h6 class="text-muted small">Click a review to inspect:</h6>
-<div class="reviews-scroll-container h-100">
-<table class="table table-sm table-hover mb-0">
-<tbody id="countryReviewsBody"></tbody>
-</table>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+    <div class="row g-4 mb-4">
+      <div class="col-lg-8">
+        <div class="chart-card" style="height: 700px;">
+          <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
+          <div id="regions_div" style="width: 100%; flex-grow: 1;"></div>
         </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="flex-card-container" style="height: 700px;">
+
+          <!-- Review Inspector -->
+          <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h4 class="mb-0 fs-5">🔍 Review Details</h4>
+              <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
+            </div>
+
+            <div id="inspectorImageContainer" class="text-center">
+              <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
+              <div id="inspectorNoImage" class="text-muted p-3 small inspector-no-image" style="display:none;">
+                🚫 No Screenshot Available
+              </div>
+            </div>
+
+            <div>
+              <div class="d-flex align-items-center mb-2">
+                <span id="inspectorRating" class="me-2 fs-5"></span>
+                <span id="inspectorFeature" class="badge bg-primary"></span>
+              </div>
+
+              <div class="inspector-text-scroll">
+                <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
+              </div>
+
+              <div class="text-muted small">
+                <strong>Device:</strong> <span id="inspectorDevice"></span><br>
+                <strong>ID:</strong> <span id="inspectorId"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Country Panel -->
+          <div class="chart-card flex-grow-1 country-card" style="min-height: 250px;">
+            <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
+
+            <!-- IMPORTANT: This wrapper is what locks the emoji+caption inside the borders -->
+            <div class="country-chart-area">
+              <canvas id="countryChart"></canvas>
+
+              <div id="countryEmptyState" class="empty-state">
+                <div class="empty-emoji">👆</div>
+                <p class="empty-caption">Click on a country on the map<br>to see details.</p>
+              </div>
+            </div>
+
+            <div id="countryReviewsSection" style="display:none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; height: 35%;">
+              <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
+              <div class="reviews-scroll-container" style="height: 100%;">
+                <table class="table table-sm table-hover mb-0">
+                  <tbody id="countryReviewsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="chart-card" style="height: 500px;">
-                <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-                <div style="width: 100%; height: 100%; position: relative;">
-                    <canvas id="demographicsChart"></canvas>
-                </div>
-            </div>
+      <div class="col-lg-6">
+        <div class="chart-card" style="height: 500px;">
+          <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+          <div style="width: 100%; height: 100%; position: relative;">
+            <canvas id="demographicsChart"></canvas>
+          </div>
         </div>
+      </div>
 
-        <div class="col-lg-6">
-            <div class="chart-card" style="height: 500px;">
-                <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
-                <div class="table-scroll-container">
-                    <table class="table table-hover table-striped mb-0">
-                        <thead style="position: sticky; top: 0; background: white; z-index: 1;">
-                        <tr>
-                            <th>ID</th>
-                            <th>Feature</th>
-                            <th>Rating</th>
-                            <th>Feedback</th>
-                            <th>Device</th>
-                            <th>Screenshot</th>
-                        </tr>
-                        <tr class="filter-row">
-                            <th><input type="text" id="searchId" class="filter-input" placeholder="ID..." onkeyup="applyFilters()"></th>
-                            <th><input type="text" id="searchFeature" class="filter-input" placeholder="Feature..." onkeyup="applyFilters()"></th>
-                            <th>
-                                <select id="searchRating" class="filter-input" onchange="applyFilters()">
-                                    <option value="">All</option>
-                                    <option value="5">5★</option>
-                                    <option value="4">4★</option>
-                                    <option value="3">3★</option>
-                                    <option value="2">2★</option>
-                                    <option value="1">1★</option>
-                                </select>
-                            </th>
-                            <th><input type="text" id="searchText" class="filter-input" placeholder="Text..." onkeyup="applyFilters()"></th>
-                            <th><input type="text" id="searchDevice" class="filter-input" placeholder="Device..." onkeyup="applyFilters()"></th>
-                            <th></th> 
-                        </tr>
-                        </thead>
-                        <tbody id="feedbackTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
+      <div class="col-lg-6">
+        <div class="chart-card" style="height: 500px;">
+          <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
+          <div class="table-scroll-container">
+            <table class="table table-hover table-striped mb-0">
+              <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                <tr>
+                  <th>ID</th>
+                  <th>Feature</th>
+                  <th>Rating</th>
+                  <th>Feedback</th>
+                  <th>Device</th>
+                  <th>Screenshot</th>
+                </tr>
+                <tr class="filter-row">
+                  <th><input type="text" id="searchId" class="filter-input" placeholder="ID..." onkeyup="applyFilters()"></th>
+                  <th><input type="text" id="searchFeature" class="filter-input" placeholder="Feature..." onkeyup="applyFilters()"></th>
+                  <th>
+                    <select id="searchRating" class="filter-input" onchange="applyFilters()">
+                      <option value="">All</option>
+                      <option value="5">5★</option>
+                      <option value="4">4★</option>
+                      <option value="3">3★</option>
+                      <option value="2">2★</option>
+                      <option value="1">1★</option>
+                    </select>
+                  </th>
+                  <th><input type="text" id="searchText" class="filter-input" placeholder="Text..." onkeyup="applyFilters()"></th>
+                  <th><input type="text" id="searchDevice" class="filter-input" placeholder="Device..." onkeyup="applyFilters()"></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="feedbackTableBody"></tbody>
+            </table>
+          </div>
         </div>
+      </div>
     </div>
+
   </div>
 
   <script>
@@ -266,6 +181,7 @@ h1,h2,h3,h4 { font-weight: 700; }
         .then(r => r.json())
         .then(data => {
           allFeedbackData = data.slice().reverse();
+
           if (canDrawMap) {
             try { drawMap(data); } catch (e) { console.error('Map error:', e); }
           } else {
@@ -278,60 +194,57 @@ h1,h2,h3,h4 { font-weight: 700; }
         .catch(err => console.error('Error fetching data:', err));
     }
 
-    // ---------- REVIEW INSPECTOR LOGIC ----------
+    // ---------- REVIEW INSPECTOR ----------
     function openReview(id) {
-        const report = allFeedbackData.find(item => item.id === id);
-        if (!report) return;
+      const report = allFeedbackData.find(item => item.id === id);
+      if (!report) return;
 
-        document.getElementById('inspectorId').innerText = report.id;
-        document.getElementById('inspectorText').innerText = report.userText || "No text provided.";
-        document.getElementById('inspectorFeature').innerText = report.featureTag;
-        document.getElementById('inspectorRating').innerText = '⭐'.repeat(report.rating);
-        document.getElementById('inspectorDevice').innerText = (report.deviceModel || '-') + ' (' + (report.osVersion || '-') + ')';
+      document.getElementById('inspectorId').innerText = report.id;
+      document.getElementById('inspectorText').innerText = report.userText || "No text provided.";
+      document.getElementById('inspectorFeature').innerText = report.featureTag;
+      document.getElementById('inspectorRating').innerText = '⭐'.repeat(report.rating);
+      document.getElementById('inspectorDevice').innerText = (report.deviceModel || '-') + ' (' + (report.osVersion || '-') + ')';
 
-        const imgEl = document.getElementById('inspectorImg');
-        const noImgEl = document.getElementById('inspectorNoImage');
-        
-        if (report.screenshotBase64 && report.screenshotBase64.length > 100) {
-            let src = report.screenshotBase64;
-            if (!src.startsWith('data:image')) {
-                src = `data:image/jpeg;base64,${src}`;
-            }
-            imgEl.src = src;
-            imgEl.style.display = 'block';
-            noImgEl.style.display = 'none';
-        } else {
-            imgEl.style.display = 'none';
-            noImgEl.style.display = 'block';
-        }
+      const imgEl = document.getElementById('inspectorImg');
+      const noImgEl = document.getElementById('inspectorNoImage');
 
-        const inspector = document.getElementById('reviewInspector');
-        inspector.style.display = 'block';
+      if (report.screenshotBase64 && report.screenshotBase64.length > 100) {
+        let src = report.screenshotBase64;
+        if (!src.startsWith('data:image')) src = `data:image/jpeg;base64,${src}`;
+        imgEl.src = src;
+        imgEl.style.display = 'block';
+        noImgEl.style.display = 'none';
+      } else {
+        imgEl.style.display = 'none';
+        noImgEl.style.display = 'block';
+      }
+
+      document.getElementById('reviewInspector').style.display = 'block';
     }
 
     function closeInspector() {
-        document.getElementById('reviewInspector').style.display = 'none';
+      document.getElementById('reviewInspector').style.display = 'none';
     }
 
-    // ---------- FILTER LOGIC ----------
+    // ---------- FILTER ----------
     function applyFilters() {
-        const idTerm = document.getElementById('searchId').value.toLowerCase();
-        const featureTerm = document.getElementById('searchFeature').value.toLowerCase();
-        const ratingTerm = document.getElementById('searchRating').value;
-        const textTerm = document.getElementById('searchText').value.toLowerCase();
-        const deviceTerm = document.getElementById('searchDevice').value.toLowerCase();
+      const idTerm = document.getElementById('searchId').value.toLowerCase();
+      const featureTerm = document.getElementById('searchFeature').value.toLowerCase();
+      const ratingTerm = document.getElementById('searchRating').value;
+      const textTerm = document.getElementById('searchText').value.toLowerCase();
+      const deviceTerm = document.getElementById('searchDevice').value.toLowerCase();
 
-        const filteredData = allFeedbackData.filter(item => {
-            const matchesId = (item.id || '').toString().toLowerCase().includes(idTerm);
-            const matchesFeature = (item.featureTag || '').toLowerCase().includes(featureTerm);
-            const matchesText = (item.userText || '').toLowerCase().includes(textTerm);
-            const matchesDevice = ((item.deviceModel || '') + ' ' + (item.osVersion || '')).toLowerCase().includes(deviceTerm);
-            const matchesRating = ratingTerm === "" || (item.rating || 0).toString() === ratingTerm;
+      const filteredData = allFeedbackData.filter(item => {
+        const matchesId = (item.id || '').toString().toLowerCase().includes(idTerm);
+        const matchesFeature = (item.featureTag || '').toLowerCase().includes(featureTerm);
+        const matchesText = (item.userText || '').toLowerCase().includes(textTerm);
+        const matchesDevice = ((item.deviceModel || '') + ' ' + (item.osVersion || '')).toLowerCase().includes(deviceTerm);
+        const matchesRating = ratingTerm === "" || (item.rating || 0).toString() === ratingTerm;
 
-            return matchesId && matchesFeature && matchesRating && matchesText && matchesDevice;
-        });
+        return matchesId && matchesFeature && matchesRating && matchesText && matchesDevice;
+      });
 
-        renderTable(filteredData);
+      renderTable(filteredData);
     }
 
     // ---------- MAP ----------
@@ -353,8 +266,8 @@ h1,h2,h3,h4 { font-weight: 700; }
       }
 
       const el = document.getElementById('regions_div');
-      
       const dataTable = google.visualization.arrayToDataTable(mapData);
+
       const options = {
         colorAxis: { minValue: 1, maxValue: 5, colors: ['#e74c3c', '#f1c40f', '#2ecc71'] },
         backgroundColor: '#ffffff',
@@ -366,12 +279,12 @@ h1,h2,h3,h4 { font-weight: 700; }
       const chart = new google.visualization.GeoChart(el);
 
       google.visualization.events.addListener(chart, 'select', function() {
-          const selection = chart.getSelection();
-          if (selection.length > 0) {
-              const row = selection[0].row;
-              const countryCode = dataTable.getValue(row, 0);
-              showCountryDetails(countryCode);
-          }
+        const selection = chart.getSelection();
+        if (selection.length > 0) {
+          const row = selection[0].row;
+          const countryCode = dataTable.getValue(row, 0);
+          showCountryDetails(countryCode);
+        }
       });
 
       chart.draw(dataTable, options);
@@ -379,69 +292,67 @@ h1,h2,h3,h4 { font-weight: 700; }
 
     // ---------- SIDE PANEL ----------
     function showCountryDetails(countryCode) {
-        // 1. Setup UI - Hide empty state, show chart canvas
-        document.getElementById('countryEmptyState').style.display = 'none';
-        document.getElementById('countryChart').style.display = 'block';
-        document.getElementById('countryReviewsSection').style.display = 'block';
-        document.getElementById('countryChartTitle').innerText = 'Ratings in: ' + countryCode;
+      document.getElementById('countryEmptyState').style.display = 'none';
+      document.getElementById('countryChart').style.display = 'block';
+      document.getElementById('countryReviewsSection').style.display = 'block';
+      document.getElementById('countryChartTitle').innerText = 'Ratings in: ' + countryCode;
 
-        const countryReports = allFeedbackData.filter(r => r.country === countryCode);
-        
-        const counts = [0, 0, 0, 0, 0];
-        countryReports.forEach(r => {
-            const rating = Number(r.rating) || 0;
-            if (rating >= 1 && rating <= 5) counts[rating - 1]++;
-        });
+      const countryReports = allFeedbackData.filter(r => r.country === countryCode);
+      const counts = [0, 0, 0, 0, 0];
 
-        const ctx = document.getElementById('countryChart').getContext('2d');
-        if (countryChartInstance) countryChartInstance.destroy();
+      countryReports.forEach(r => {
+        const rating = Number(r.rating) || 0;
+        if (rating >= 1 && rating <= 5) counts[rating - 1]++;
+      });
 
-        countryChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['1⭐', '2⭐', '3⭐', '4⭐', '5⭐'],
-                datasets: [{
-                    label: 'Count',
-                    data: counts,
-                    backgroundColor: ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-            }
-        });
+      const ctx = document.getElementById('countryChart').getContext('2d');
+      if (countryChartInstance) countryChartInstance.destroy();
 
-        // Fill Mini Reviews Table
-        const reviewsBody = document.getElementById('countryReviewsBody');
-        reviewsBody.innerHTML = ''; 
-        const recentCountryReviews = countryReports.slice(0, 20);
-
-        if (recentCountryReviews.length === 0) {
-             reviewsBody.innerHTML = '<tr><td class="text-muted text-center">No text reviews available.</td></tr>';
-        } else {
-            recentCountryReviews.forEach(r => {
-                const stars = '⭐'.repeat(Number(r.rating) || 0);
-                const feature = escapeHtml(r.featureTag || '-');
-                const text = escapeHtml(r.userText || '');
-                
-                const row = `
-                    <tr class="clickable-row" onclick="openReview('${r.id}')">
-                        <td>
-                            <div class="d-flex justify-content-between">
-                                <span style="font-size: 0.85em; font-weight: bold; color: #3f51b5;">${feature}</span>
-                                <span style="font-size: 0.7em;">${stars}</span>
-                            </div>
-                            <div class="mt-1 text-truncate" style="max-width: 200px; font-size: 0.9em;">${text}</div>
-                        </td>
-                    </tr>
-                `;
-                reviewsBody.innerHTML += row;
-            });
+      countryChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['1⭐', '2⭐', '3⭐', '4⭐', '5⭐'],
+          datasets: [{
+            label: 'Count',
+            data: counts,
+            backgroundColor: ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
+      });
+
+      const reviewsBody = document.getElementById('countryReviewsBody');
+      reviewsBody.innerHTML = '';
+      const recentCountryReviews = countryReports.slice(0, 20);
+
+      if (recentCountryReviews.length === 0) {
+        reviewsBody.innerHTML = '<tr><td class="text-muted text-center">No text reviews available.</td></tr>';
+      } else {
+        recentCountryReviews.forEach(r => {
+          const stars = '⭐'.repeat(Number(r.rating) || 0);
+          const feature = escapeHtml(r.featureTag || '-');
+          const text = escapeHtml(r.userText || '');
+
+          const row = `
+            <tr class="clickable-row" onclick="openReview('${r.id}')">
+              <td>
+                <div class="d-flex justify-content-between">
+                  <span style="font-size: 0.85em; font-weight: bold; color: #3f51b5;">${feature}</span>
+                  <span style="font-size: 0.7em;">${stars}</span>
+                </div>
+                <div class="mt-1 text-truncate" style="max-width: 200px; font-size: 0.9em;">${text}</div>
+              </td>
+            </tr>
+          `;
+          reviewsBody.innerHTML += row;
+        });
+      }
     }
 
     // ---------- MAIN TABLE ----------
@@ -449,20 +360,16 @@ h1,h2,h3,h4 { font-weight: 700; }
       const tableBody = document.getElementById('feedbackTableBody');
       if (!tableBody) return;
       tableBody.innerHTML = "";
-      
+
       if (!Array.isArray(data) || data.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-3 text-muted">No matching records found</td></tr>';
-          return;
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-3 text-muted">No matching records found</td></tr>';
+        return;
       }
 
-      const displayData = data; 
-      
-      displayData.forEach(report => {
+      data.forEach(report => {
         const stars = '⭐'.repeat(Number(report.rating) || 0);
         let imageHtml = '<span class="text-muted">-</span>';
-        if (report.screenshotBase64) {
-            imageHtml = `<span style="font-size:1.2rem;">📷</span>`;
-        }
+        if (report.screenshotBase64) imageHtml = `<span style="font-size:1.2rem;">📷</span>`;
 
         const idStr = (report.id ?? '').toString();
 
@@ -490,7 +397,7 @@ h1,h2,h3,h4 { font-weight: 700; }
       const labels = ['15-24', '25-34', '35-44', '45-54', '55-64', '+64'];
       const male = [0,0,0,0,0,0];
       const female = [0,0,0,0,0,0];
-      
+
       const bucketIndex = (age) => {
         const a = Number(age);
         if (!Number.isFinite(a) || a < 15) return -1;
@@ -504,8 +411,8 @@ h1,h2,h3,h4 { font-weight: 700; }
 
       let used = 0;
       reports.forEach(r => {
-        const idx = bucketIndex(r.userAge); 
-        const g = (r.userGender ?? '').toString().trim().toLowerCase(); 
+        const idx = bucketIndex(r.userAge);
+        const g = (r.userGender ?? '').toString().trim().toLowerCase();
         if (idx === -1 || !g) return;
 
         used++;
@@ -530,8 +437,8 @@ h1,h2,h3,h4 { font-weight: 700; }
         data: {
           labels,
           datasets: [
-            { label: 'Male', data: male.map(x => -x), backgroundColor: '#3F51B5', borderRadius: 4 },    
-            { label: 'Female', data: female, backgroundColor: '#4CAF50', borderRadius: 4 } 
+            { label: 'Male', data: male.map(x => -x), backgroundColor: '#3F51B5', borderRadius: 4 },
+            { label: 'Female', data: female, backgroundColor: '#4CAF50', borderRadius: 4 }
           ]
         },
         options: {
@@ -542,9 +449,7 @@ h1,h2,h3,h4 { font-weight: 700; }
             x: { stacked: true, ticks: { callback: v => Math.abs(v) } },
             y: { stacked: true }
           },
-          plugins: {
-            tooltip: { callbacks: { label: c => `${c.dataset.label}: ${Math.abs(c.raw)}` } }
-          }
+          plugins: { tooltip: { callbacks: { label: c => `${c.dataset.label}: ${Math.abs(c.raw)}` } } }
         }
       });
     }
@@ -558,5 +463,6 @@ h1,h2,h3,h4 { font-weight: 700; }
         .replace(/'/g,"&#039;");
     }
   </script>
+
 </body>
 </html>
