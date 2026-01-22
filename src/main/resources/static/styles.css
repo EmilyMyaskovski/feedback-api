@@ -71,7 +71,8 @@ h1, h2, h3, h4 { font-weight: 700; }
   border-radius: 8px;
   border: 1px solid #ddd;
   margin-bottom: 10px;
-  max-height: 200px;
+  height: 300px;
+  max-height: none;
   object-fit: contain;
   background-color: #000;
 }
@@ -109,7 +110,7 @@ h1, h2, h3, h4 { font-weight: 700; }
 }
 
 #reviewInspector {
-  max-height: 320px;  
+  max-height: 520px;  
   overflow: auto;
 }
 

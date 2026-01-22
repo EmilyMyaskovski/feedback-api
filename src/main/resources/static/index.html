@@ -212,8 +212,8 @@
         let src = report.screenshotBase64;
         if (!src.startsWith('data:image')) src = `data:image/jpeg;base64,${src}`;
         imgEl.src = src;
-        imgEl.style.display = 'block';
-        noImgEl.style.display = 'none';
+        imgEl.style.cursor = "zoom-in";
+        imgEl.onclick = () => window.open(src, "_blank");
       } else {
         imgEl.style.display = 'none';
         noImgEl.style.display = 'block';
