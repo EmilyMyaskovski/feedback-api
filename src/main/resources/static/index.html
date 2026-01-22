@@ -19,7 +19,10 @@
 
   <div class="container-fluid px-4 mb-5">
 
+    <!-- ================= ROW 1 ================= -->
     <div class="row g-4 mb-4">
+
+      <!-- MAP -->
       <div class="col-lg-8">
         <div class="chart-card" style="height: 700px;">
           <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
@@ -27,70 +30,46 @@
         </div>
       </div>
 
+      <!-- INSPECTOR -->
       <div class="col-lg-4">
-        <div class="flex-card-container" style="height: 700px;">
+        <div class="chart-card" style="height: 700px; overflow:auto;" id="reviewInspector" style="display:none; border-left: 5px solid #3f51b5;">
+          
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0 fs-5">🔍 Review Details</h4>
+            <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
+          </div>
 
-          <!-- Review Inspector -->
-          <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h4 class="mb-0 fs-5">🔍 Review Details</h4>
-              <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
-            </div>
-
-            <div id="inspectorImageContainer" class="text-center">
-              <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
-              <div id="inspectorNoImage" class="text-muted p-3 small inspector-no-image" style="display:none;">
-                🚫 No Screenshot Available
-              </div>
-            </div>
-
-            <div>
-              <div class="d-flex align-items-center mb-2">
-                <span id="inspectorRating" class="me-2 fs-5"></span>
-                <span id="inspectorFeature" class="badge bg-primary"></span>
-              </div>
-
-              <div class="inspector-text-scroll">
-                <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
-              </div>
-
-              <div class="text-muted small">
-                <strong>Device:</strong> <span id="inspectorDevice"></span><br>
-                <strong>ID:</strong> <span id="inspectorId"></span>
-              </div>
+          <div id="inspectorImageContainer" class="text-center">
+            <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
+            <div id="inspectorNoImage" class="text-muted p-3 small inspector-no-image" style="display:none;">
+              🚫 No Screenshot Available
             </div>
           </div>
 
-          <!-- Country Panel -->
-          <div class="chart-card flex-grow-1 country-card" style="min-height: 250px;">
-            <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
-
-            <!-- IMPORTANT: This wrapper is what locks the emoji+caption inside the borders -->
-            <div class="country-chart-area">
-              <canvas id="countryChart"></canvas>
-
-              <div id="countryEmptyState" class="empty-state">
-                <div class="empty-emoji">👆</div>
-                <p class="empty-caption">Click on a country on the map<br>to see details.</p>
-              </div>
+          <div>
+            <div class="d-flex align-items-center mb-2">
+              <span id="inspectorRating" class="me-2 fs-5"></span>
+              <span id="inspectorFeature" class="badge bg-primary"></span>
             </div>
 
-            <div id="countryReviewsSection" style="display:none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; height: 35%;">
-              <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
-              <div class="reviews-scroll-container" style="height: 100%;">
-                <table class="table table-sm table-hover mb-0">
-                  <tbody id="countryReviewsBody"></tbody>
-                </table>
-              </div>
+            <div class="inspector-text-scroll">
+              <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
             </div>
 
+            <div class="text-muted small">
+              <strong>Device:</strong> <span id="inspectorDevice"></span><br>
+              <strong>ID:</strong> <span id="inspectorId"></span>
+            </div>
           </div>
 
         </div>
       </div>
     </div>
-<!-- ================= SECOND ROW ================= -->
-    <div class="row g-4">
+
+    <!-- ================= ROW 2 ================= -->
+    <div class="row g-4 mb-4">
+
+      <!-- DEMOGRAPHICS -->
       <div class="col-lg-6">
         <div class="chart-card" style="height: 500px;">
           <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
@@ -99,38 +78,42 @@
           </div>
         </div>
       </div>
-  <!-- Select Country (RIGHT) -->
-  <div class="col-lg-6">
-    <div class="chart-card country-card" style="height: 500px;">
 
-      <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
+      <!-- SELECT COUNTRY -->
+      <div class="col-lg-6">
+        <div class="chart-card country-card" style="height: 500px;">
 
-      <div class="country-chart-area">
-        <canvas id="countryChart"></canvas>
+          <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
 
-        <div id="countryEmptyState" class="empty-state">
-          <div class="empty-emoji">👆</div>
-          <p class="empty-caption">
-            Click on a country on the map<br>to see details.
-          </p>
+          <div class="country-chart-area">
+            <canvas id="countryChart"></canvas>
+
+            <div id="countryEmptyState" class="empty-state">
+              <div class="empty-emoji">👆</div>
+              <p class="empty-caption">
+                Click on a country on the map<br>to see details.
+              </p>
+            </div>
+          </div>
+
+          <div id="countryReviewsSection" class="country-reviews" style="display:none;">
+            <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
+            <div class="reviews-scroll-container">
+              <table class="table table-sm table-hover mb-0">
+                <tbody id="countryReviewsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
-
-      <div id="countryReviewsSection" class="country-reviews" style="display:none;">
-        <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
-        <div class="reviews-scroll-container">
-          <table class="table table-sm table-hover mb-0">
-            <tbody id="countryReviewsBody"></tbody>
-          </table>
-        </div>
-      </div>
-
     </div>
-  </div>
-</div>
 
-  <!-- ================= THIRD ROW ================= -->
-     <div class="row g-4">
+    <!-- ================= ROW 3 ================= -->
+    <div class="row g-4">
+
+      <!-- RECENT REPORTS FULL WIDTH -->
+      <div class="col-12">
         <div class="chart-card" style="height: 520px;">
           <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
           <div class="table-scroll-container">
