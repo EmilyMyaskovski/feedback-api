@@ -10,7 +10,7 @@
 
   <style>
     body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+    .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 0; /* Removed bottom margin for grid */ height: 100%; /* Make cards fill container height */ }
     .header-bg { background-color: #3f51b5; color: white; padding: 40px 0; margin-bottom: 30px; }
     h1, h2, h3, h4 { font-weight: 700; }
 
@@ -40,14 +40,15 @@
         flex-direction: column;
     }
     
-    /* Scrollbar for the mini-table */
-    .reviews-scroll-container {
-        max-height: 250px;
+    /* Scrollbar for the mini-table and main table */
+    .reviews-scroll-container, .table-scroll-container {
         overflow-y: auto;
         border: 1px solid #eee;
         border-radius: 8px;
         padding: 5px;
     }
+    .reviews-scroll-container { max-height: 250px; }
+    .table-scroll-container { max-height: 400px; /* Adjust height for main table */ }
 
     /* Clickable rows */
     .clickable-row {
@@ -68,6 +69,13 @@
         object-fit: contain;
         background-color: #000;
     }
+
+    /* Flex container to align cards in row 2 */
+    .flex-card-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
   </style>
 </head>
 
@@ -77,10 +85,7 @@
     <p>Real-time User Insights & Data</p>
   </div>
 
-  <div class="container-fluid px-4">
-    
-    <div class="row">
-        <div class="col-lg-8">
+  <div class="container-fluid px-4 mb-5"> <div class="row g-4 mb-4"> <div class="col-lg-8">
             <div class="chart-card" style="height: 700px;">
               <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
               <div id="regions_div" style="width: 100%; height: 600px;"></div>
@@ -88,97 +93,98 @@
         </div>
 
         <div class="col-lg-4">
-            
-            <div id="reviewInspector" class="chart-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">🔍 Review Details</h4>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
-                </div>
-                
-                <div id="inspectorImageContainer" class="text-center">
-                    <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
-                    <div id="inspectorNoImage" class="text-muted p-4" style="display:none; background:#f9f9f9; border-radius:8px; margin-bottom:15px;">
-                        🚫 No Screenshot Available
+            <div class="flex-card-container"> <div id="reviewInspector" class="chart-card mb-3" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff; height: auto; /* Auto height when visible */">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">🔍 Review Details</h4>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
                     </div>
-                </div>
-
-                <div>
-                    <span id="inspectorRating" class="fs-4"></span>
-                    <h5 id="inspectorFeature" class="badge bg-primary fs-6 mb-2"></h5>
-                    <p id="inspectorText" class="lead" style="font-size: 1.1rem; background: #f8f9fa; padding: 10px; border-radius: 5px;"></p>
                     
-                    <hr>
-                    <small class="text-muted">
-                        <strong>Device:</strong> <span id="inspectorDevice"></span><br>
-                        <strong>ID:</strong> <span id="inspectorId"></span>
-                    </small>
-                </div>
-            </div>
+                    <div id="inspectorImageContainer" class="text-center">
+                        <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot">
+                        <div id="inspectorNoImage" class="text-muted p-4" style="display:none; background:#f9f9f9; border-radius:8px; margin-bottom:15px;">
+                            🚫 No Screenshot Available
+                        </div>
+                    </div>
 
-            <div class="chart-card" style="min-height: 400px; display: flex; flex-direction: column;">
-                <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
-                
-                <div style="flex: 1; position: relative; min-height: 200px;">
-                    <canvas id="countryChart"></canvas>
-                    <div id="countryEmptyState" class="empty-state">
-                        <div style="font-size: 3rem;">👆</div>
-                        <p>Click on a country on the map<br>to see details.</p>
+                    <div>
+                        <span id="inspectorRating" class="fs-4"></span>
+                        <h5 id="inspectorFeature" class="badge bg-primary fs-6 mb-2"></h5>
+                        <p id="inspectorText" class="lead" style="font-size: 1.1rem; background: #f8f9fa; padding: 10px; border-radius: 5px;"></p>
+                        
+                        <hr>
+                        <small class="text-muted">
+                            <strong>Device:</strong> <span id="inspectorDevice"></span><br>
+                            <strong>ID:</strong> <span id="inspectorId"></span>
+                        </small>
                     </div>
                 </div>
 
-                <div id="countryReviewsSection" style="display:none; margin-top: 15px; border-top: 2px solid #f4f6f9; padding-top: 10px;">
-                    <h6 class="text-muted mb-2">Click a review to inspect:</h6>
-                    <div class="reviews-scroll-container">
-                        <table class="table table-sm table-hover mb-0">
-                            <tbody id="countryReviewsBody"></tbody>
-                        </table>
+                <div class="chart-card flex-grow-1" style="display: flex; flex-direction: column; /* flex-grow-1 makes it fill remaining space */">
+                    <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
+                    
+                    <div style="flex: 1; position: relative; min-height: 200px;">
+                        <canvas id="countryChart"></canvas>
+                        <div id="countryEmptyState" class="empty-state">
+                            <div style="font-size: 3rem;">👆</div>
+                            <p>Click on a country on the map<br>to see details.</p>
+                        </div>
                     </div>
-                </div>
 
+                    <div id="countryReviewsSection" style="display:none; margin-top: 15px; border-top: 2px solid #f4f6f9; padding-top: 10px;">
+                        <h6 class="text-muted mb-2">Click a review to inspect:</h6>
+                        <div class="reviews-scroll-container">
+                            <table class="table table-sm table-hover mb-0">
+                                <tbody id="countryReviewsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="container">
-        <div class="chart-card">
-            <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
-            <div style="width: 100%; max-width: 800px; margin: 0 auto;">
-                <canvas id="demographicsChart"></canvas>
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="chart-card" style="min-height: 500px;"> <h2 class="text-center mb-4">👥 Audience Demographics (Est.)</h2>
+                <div style="width: 100%; max-width: 800px; margin: 0 auto; height: 400px;">
+                    <canvas id="demographicsChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="chart-card">
-        <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
-        <table class="table table-hover table-striped">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Feature</th>
-                <th>Rating</th>
-                <th>Feedback</th>
-                <th>Device</th>
-                <th>Screenshot</th>
-            </tr>
-            <tr class="filter-row">
-                <th><input type="text" id="searchId" class="filter-input" placeholder="Search ID..." onkeyup="applyFilters()"></th>
-                <th><input type="text" id="searchFeature" class="filter-input" placeholder="Filter Feature..." onkeyup="applyFilters()"></th>
-                <th>
-                    <select id="searchRating" class="filter-input" onchange="applyFilters()">
-                        <option value="">All</option>
-                        <option value="5">⭐⭐⭐⭐⭐</option>
-                        <option value="4">⭐⭐⭐⭐</option>
-                        <option value="3">⭐⭐⭐</option>
-                        <option value="2">⭐⭐</option>
-                        <option value="1">⭐</option>
-                    </select>
-                </th>
-                <th><input type="text" id="searchText" class="filter-input" placeholder="Search text..." onkeyup="applyFilters()"></th>
-                <th><input type="text" id="searchDevice" class="filter-input" placeholder="Filter Device..." onkeyup="applyFilters()"></th>
-                <th></th> 
-            </tr>
-            </thead>
-            <tbody id="feedbackTableBody"></tbody>
-        </table>
+        <div class="col-lg-6">
+            <div class="chart-card" style="min-height: 500px; display: flex; flex-direction: column;"> <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
+                <div class="table-scroll-container flex-grow-1"> <table class="table table-hover table-striped mb-0"> <thead style="position: sticky; top: 0; background: white; z-index: 1;"> <tr>
+                            <th>ID</th>
+                            <th>Feature</th>
+                            <th>Rating</th>
+                            <th>Feedback</th>
+                            <th>Device</th>
+                            <th>Screenshot</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th><input type="text" id="searchId" class="filter-input" placeholder="Search ID..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchFeature" class="filter-input" placeholder="Filter Feature..." onkeyup="applyFilters()"></th>
+                            <th>
+                                <select id="searchRating" class="filter-input" onchange="applyFilters()">
+                                    <option value="">All</option>
+                                    <option value="5">⭐⭐⭐⭐⭐</option>
+                                    <option value="4">⭐⭐⭐⭐</option>
+                                    <option value="3">⭐⭐⭐</option>
+                                    <option value="2">⭐⭐</option>
+                                    <option value="1">⭐</option>
+                                </select>
+                            </th>
+                            <th><input type="text" id="searchText" class="filter-input" placeholder="Search text..." onkeyup="applyFilters()"></th>
+                            <th><input type="text" id="searchDevice" class="filter-input" placeholder="Filter Device..." onkeyup="applyFilters()"></th>
+                            <th></th> 
+                        </tr>
+                        </thead>
+                        <tbody id="feedbackTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
   </div>
@@ -235,20 +241,17 @@
         .catch(err => console.error('Error fetching data:', err));
     }
 
-    // ---------- NEW: REVIEW INSPECTOR LOGIC ----------
+    // ---------- REVIEW INSPECTOR LOGIC ----------
     function openReview(id) {
-        // 1. Find the review object
         const report = allFeedbackData.find(item => item.id === id);
         if (!report) return;
 
-        // 2. Populate Data
         document.getElementById('inspectorId').innerText = report.id;
         document.getElementById('inspectorText').innerText = report.userText || "No text provided.";
         document.getElementById('inspectorFeature').innerText = report.featureTag;
         document.getElementById('inspectorRating').innerText = '⭐'.repeat(report.rating);
         document.getElementById('inspectorDevice').innerText = (report.deviceModel || '-') + ' (' + (report.osVersion || '-') + ')';
 
-        // 3. Handle Image
         const imgEl = document.getElementById('inspectorImg');
         const noImgEl = document.getElementById('inspectorNoImage');
         
@@ -265,10 +268,10 @@
             noImgEl.style.display = 'block';
         }
 
-        // 4. Show Inspector and scroll to it
         const inspector = document.getElementById('reviewInspector');
         inspector.style.display = 'block';
-        inspector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Scroll to the inspector (optional, might not be needed in new layout)
+        // inspector.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function closeInspector() {
@@ -388,7 +391,6 @@
                 const feature = escapeHtml(r.featureTag || '-');
                 const text = escapeHtml(r.userText || '');
                 
-                // Add onclick to these rows too!
                 const row = `
                     <tr class="clickable-row" onclick="openReview('${r.id}')">
                         <td>
@@ -416,8 +418,8 @@
           return;
       }
 
-      const limit = 50;
-      const displayData = data.slice(0, limit);
+      // Removed limit for main table, relying on scroll
+      const displayData = data; 
       
       displayData.forEach(report => {
         const stars = '⭐'.repeat(Number(report.rating) || 0);
@@ -428,7 +430,6 @@
 
         const idStr = (report.id ?? '').toString();
 
-        // Add onclick event here
         tableBody.innerHTML += `
           <tr class="clickable-row" onclick="openReview('${report.id}')">
             <td><small title="${idStr}">${idStr.substring(0, 8)}...</small></td>
@@ -443,9 +444,7 @@
         `;
       });
       
-      if (data.length > limit) {
-          tableBody.innerHTML += `<tr><td colspan="6" class="text-center text-muted"><small>Showing first ${limit} results out of ${data.length}...</small></td></tr>`;
-      }
+      // Removed "Showing first X results" message since we use scroll now
     }
 
     // ---------- DEMOGRAPHICS ----------
@@ -504,6 +503,7 @@
         options: {
           indexAxis: 'y',
           responsive: true,
+          maintainAspectRatio: false, // Allow chart to fill container height
           scales: {
             x: { stacked: true, ticks: { callback: v => Math.abs(v) } },
             y: { stacked: true }
