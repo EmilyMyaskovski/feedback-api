@@ -1,246 +1,237 @@
 /* prevent layout shift when scrollbar appears/disappears */
-html {
-  overflow-y: scroll;         
-  scrollbar-gutter: stable;   
-}
+    html {
+      overflow-y: scroll;         
+      scrollbar-gutter: stable;   
+    }
 
-body {
-  background-color: #f4f6f9;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-/* --- Scrollbar Styling --- */
-.reviews-scroll-container::-webkit-scrollbar,
-.table-scroll-container::-webkit-scrollbar,
-.inspector-text-scroll::-webkit-scrollbar,
-.log-terminal::-webkit-scrollbar, /* הוספנו את הטרמינל לרשימה */
-#reviewInspector::-webkit-scrollbar,
-.country-scroll-area::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
+    /* --- Scrollbar Styling --- */
+    .reviews-scroll-container::-webkit-scrollbar,
+    .table-scroll-container::-webkit-scrollbar,
+    .inspector-text-scroll::-webkit-scrollbar,
+    .log-terminal::-webkit-scrollbar,
+    #reviewInspector::-webkit-scrollbar,
+    .country-scroll-area::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
 
-.reviews-scroll-container::-webkit-scrollbar-track,
-.table-scroll-container::-webkit-scrollbar-track,
-.inspector-text-scroll::-webkit-scrollbar-track,
-.log-terminal::-webkit-scrollbar-track,
-#reviewInspector::-webkit-scrollbar-track,
-.country-scroll-area::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
+    .reviews-scroll-container::-webkit-scrollbar-track,
+    .table-scroll-container::-webkit-scrollbar-track,
+    .inspector-text-scroll::-webkit-scrollbar-track,
+    .log-terminal::-webkit-scrollbar-track,
+    #reviewInspector::-webkit-scrollbar-track,
+    .country-scroll-area::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
 
-.reviews-scroll-container::-webkit-scrollbar-thumb,
-.table-scroll-container::-webkit-scrollbar-thumb,
-.inspector-text-scroll::-webkit-scrollbar-thumb,
-.log-terminal::-webkit-scrollbar-thumb,
-#reviewInspector::-webkit-scrollbar-thumb,
-.country-scroll-area::-webkit-scrollbar-thumb {
-    background: #ccc; 
-    border-radius: 4px;
-}
+    .reviews-scroll-container::-webkit-scrollbar-thumb,
+    .table-scroll-container::-webkit-scrollbar-thumb,
+    .inspector-text-scroll::-webkit-scrollbar-thumb,
+    .log-terminal::-webkit-scrollbar-thumb,
+    #reviewInspector::-webkit-scrollbar-thumb,
+    .country-scroll-area::-webkit-scrollbar-thumb {
+        background: #ccc; 
+        border-radius: 4px;
+    }
 
-.reviews-scroll-container::-webkit-scrollbar-thumb:hover,
-.table-scroll-container::-webkit-scrollbar-thumb:hover,
-.inspector-text-scroll::-webkit-scrollbar-thumb:hover,
-.log-terminal::-webkit-scrollbar-thumb:hover,
-#reviewInspector::-webkit-scrollbar-thumb:hover,
-.country-scroll-area::-webkit-scrollbar-thumb:hover {
-    background: #bbb; 
-}
+    .reviews-scroll-container::-webkit-scrollbar-thumb:hover,
+    .table-scroll-container::-webkit-scrollbar-thumb:hover,
+    .inspector-text-scroll::-webkit-scrollbar-thumb:hover,
+    .log-terminal::-webkit-scrollbar-thumb:hover,
+    #reviewInspector::-webkit-scrollbar-thumb:hover,
+    .country-scroll-area::-webkit-scrollbar-thumb:hover {
+        background: #bbb; 
+    }
 
-/* Cards */
-.chart-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+    /* Cards */
+    .chart-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-.chart-card-flush {
-    padding: 0 !important; 
-}
+    .chart-card-flush {
+        padding: 0 !important; 
+    }
 
-.card-header-padded {
-    padding: 20px 20px 10px 20px;
-    background: #fff;
-    z-index: 2;
-}
+    .card-header-padded {
+        padding: 20px 20px 10px 20px;
+        background: #fff;
+        z-index: 2;
+    }
 
-.header-bg {
-  background-color: #3f51b5;
-  color: white;
-  padding: 40px 0;
-  margin-bottom: 30px;
-}
+    .header-bg {
+      background-color: #3f51b5;
+      color: white;
+      padding: 40px 0;
+      margin-bottom: 30px;
+    }
 
-h1, h2, h3, h4 { font-weight: 700; }
+    h1, h2, h3, h4 { font-weight: 700; }
 
-/* Filters */
-.filter-input {
-  width: 100%;
-  padding: 4px 8px;
-  font-size: 13px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
+    /* Filters */
+    .filter-input {
+      width: 100%;
+      padding: 4px 8px;
+      font-size: 13px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
 
-.filter-row th {
-  background-color: #f8f9fa;
-  padding: 10px 5px;
-  border-bottom: 1px solid #eee;
-}
+    .filter-row th {
+      background-color: #f8f9fa;
+      padding: 10px 5px;
+      border-bottom: 1px solid #eee;
+    }
 
-/* Scroll containers */
-.reviews-scroll-container { 
-    overflow-y: auto; 
-    max-height: 250px;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 5px;
-}
+    /* Scroll containers */
+    .reviews-scroll-container { 
+        overflow-y: auto; 
+        max-height: 250px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 5px;
+    }
 
-.table-scroll-container { 
-    flex-grow: 1; 
-    overflow-y: auto; 
-    width: 100%; 
-}
+    .table-scroll-container { 
+        flex-grow: 1; 
+        overflow-y: auto; 
+        width: 100%; 
+    }
 
-/* Clickable rows */
-.clickable-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
+    /* Clickable rows */
+    .clickable-row {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
 
-.clickable-row:hover {
-    background-color: #e8eaf6 !important;
-}
+    .clickable-row:hover {
+        background-color: #e8eaf6 !important;
+    }
 
-/* Inspector Image */
-.inspector-img {
-    width: 100%;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
-    max-height: 200px;
-    object-fit: contain;
-    background-color: #000;
-    cursor: pointer; 
-    transition: opacity 0.2s;
-}
+    /* Inspector Image */
+    .inspector-img {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 8px;
+        max-height: 140px; 
+        object-fit: contain;
+        background-color: #000;
+        cursor: pointer; 
+        transition: opacity 0.2s;
+    }
 
-.inspector-img:hover {
-    opacity: 0.9;
-}
+    .inspector-img:hover {
+        opacity: 0.9;
+    }
 
-/* Inspector scroll area */
-.inspector-text-scroll {
-  max-height: 150px;
-  overflow-y: auto;
-  background: #f8f9fa;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  border: 1px solid #eee;
-}
+    /* Inspector scroll area */
+    .inspector-text-scroll {
+      max-height: 80px; 
+      overflow-y: auto;
+      background: #f8f9fa;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 8px;
+      border: 1px solid #eee;
+    }
 
-/* --- NEW: Log Terminal Style --- */
-.log-terminal {
-    background-color: #1e1e1e; /* Dark background */
-    color: #4caf50;           /* Terminal Green text */
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace; /* Code font */
-    font-size: 0.8rem;
-    padding: 12px;
-    border-radius: 6px;
-    max-height: 200px;        /* Scrollable height */
-    overflow-y: auto;
-    white-space: pre-wrap;    /* Preserve line breaks and spaces */
-    border: 1px solid #333;
-    margin-top: 5px;
-}
+    /* Log Terminal Style */
+    .log-terminal {
+        background-color: #1e1e1e;
+        color: #4caf50;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.75rem; 
+        padding: 10px;
+        border-radius: 6px;
+        max-height: 120px; 
+        overflow-y: auto;
+        white-space: pre-wrap;
+        border: 1px solid #333;
+        margin-top: 5px;
+    }
 
-/* Layout Helpers */
-.flex-card-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 20px;
-  overflow: hidden;
-}
+    /* Country Card */
+    .country-card {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex: 1; 
+      min-height: 0; 
+    }
 
-.auto-height-card {
-  height: auto !important;
-  flex-shrink: 0;
-}
+    .country-scroll-area {
+      flex: 1;             
+      overflow-y: auto;    
+      min-height: 0;
+      padding-right: 4px;  
+    }
 
-#reviewInspector {
-  max-height: none;  /* Changed to allow expansion for logs */
-  overflow: visible;
-}
+    .country-chart-area {
+      position: relative;
+      height: 200px; 
+      flex-shrink: 0;      
+      overflow: hidden;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
 
-.country-card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; 
-}
+    #countryChart {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: none; 
+    }
 
-.country-scroll-area {
-  flex: 1;             
-  overflow-y: auto;    
-  min-height: 0;
-  padding-right: 4px;  
-}
+    #countryReviewsSection {
+      display: block;      
+      height: auto;        
+      overflow: visible;   
+      margin-top: 10px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
 
-.country-chart-area {
-  position: relative;
-  height: 260px;       
-  flex-shrink: 0;      
-  overflow: hidden;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
+    #countryReviewsSection .reviews-scroll-container {
+      height: auto;
+      max-height: none;    
+      overflow: visible;   
+      border: none;
+      padding: 0;
+    }
 
-#countryChart {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: none; 
-}
+    #countryEmptyState.empty-state, #inspectorEmptyState.empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 16px;
+      text-align: center;
+      overflow: hidden; 
+    }
+    
+    /* Make Inspector Empty State Relative so it sits in the card */
+    #inspectorEmptyState.empty-state {
+        position: relative;
+        height: 100%;
+        min-height: 300px;
+    }
 
-#countryReviewsSection {
-  display: block;      
-  height: auto;        
-  overflow: visible;   
-  margin-top: 10px;
-  border-top: 1px solid #eee;
-  padding-top: 10px;
-}
-
-#countryReviewsSection .reviews-scroll-container {
-  height: auto;
-  max-height: none;    
-  overflow: visible;   
-  border: none;
-  padding: 0;
-}
-
-#countryEmptyState.empty-state {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 16px;
-  text-align: center;
-  overflow: hidden; 
-}
-
-.empty-emoji { font-size: 3rem; line-height: 1; }
-.empty-caption { margin: 0; max-width: 85%; word-break: break-word; }
+    .empty-emoji { font-size: 3rem; line-height: 1; }
+    .empty-caption { margin: 0; max-width: 85%; word-break: break-word; }

@@ -20,78 +20,82 @@
   <div class="container-fluid px-4 mb-5">
 
     <div class="row g-4 mb-4">
-      <div class="col-lg-8">
-        <div class="chart-card" style="height: 700px;">
+      <div class="col-12">
+        <div class="chart-card" style="height: 500px;">
           <h2 class="text-center mb-4">🌍 Global Satisfaction Map</h2>
           <div id="regions_div" style="width: 100%; flex-grow: 1;"></div>
         </div>
       </div>
+    </div>
 
-      <div class="col-lg-4">
-        <div class="flex-card-container" style="height: 600px;">
-
-          <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff; max-height: 700px; overflow-y: auto;">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h4 class="mb-0 fs-5">🔍 Review Details</h4>
-              <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
+    <div class="row g-4 mb-4">
+        
+        <div class="col-lg-6">
+            <div class="chart-card country-card" style="height: 500px;">
+                <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
+                <div class="country-scroll-area">
+                    <div class="country-chart-area">
+                        <canvas id="countryChart"></canvas>
+                        <div id="countryEmptyState" class="empty-state">
+                            <div class="empty-emoji">👆</div>
+                            <p class="empty-caption">Click on a country on the map<br>to see details.</p>
+                        </div>
+                    </div>
+                    <div id="countryReviewsSection" style="display:none;">
+                        <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
+                        <div class="reviews-scroll-container">
+                            <table class="table table-sm table-hover mb-0">
+                                <tbody id="countryReviewsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div id="inspectorImageContainer" class="text-center">
-              <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot" onclick="openImageInNewTab(this.src);" title="Click to enlarge">
-              <div id="inspectorNoImage" class="text-muted p-3 small inspector-no-image" style="display:none;">
-                🚫 No Screenshot Available
-              </div>
-            </div>
-
-            <div>
-              <div class="d-flex align-items-center mb-2">
-                <span id="inspectorRating" class="me-2 fs-5"></span>
-                <span id="inspectorFeature" class="badge bg-primary"></span>
-              </div>
-
-              <div class="inspector-text-scroll">
-                <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
-              </div>
-
-              <div class="text-muted small">
-                <strong>Device:</strong> <span id="inspectorDevice"></span><br>
-                <strong>ID:</strong> <span id="inspectorId"></span>
-              </div>
-
-              <div id="logsSection" style="display:none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-                  <h6 class="text-muted mb-2">💻 Device Logs</h6>
-                  <div id="inspectorLogs" class="log-terminal"></div>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="chart-card flex-grow-1 country-card" style="min-height: 250px;">
-            <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
-              <div class="country-scroll-area">
-            
-            <div class="country-chart-area">
-              <canvas id="countryChart"></canvas>
-
-              <div id="countryEmptyState" class="empty-state">
-                <div class="empty-emoji">👆</div>
-                <p class="empty-caption">Click on a country on the map<br>to see details.</p>
-              </div>
-            </div>
-
-            <div id="countryReviewsSection" class="country-reviews" style="display:none;">
-              <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
-              <div class="reviews-scroll-container">
-                <table class="table table-sm table-hover mb-0">
-                  <tbody id="countryReviewsBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-
         </div>
-      </div>
+
+        <div class="col-lg-6">
+            <div class="chart-card" style="height: 500px; overflow: hidden;">
+                <div id="inspectorEmptyState" class="empty-state">
+                    <div class="empty-emoji">📝</div>
+                    <p class="empty-caption">Click a row in the table below<br>to view full details & logs.</p>
+                </div>
+
+                <div id="reviewInspectorContent" style="display:none; flex-direction: column; height: 100%; overflow-y: auto; padding-right: 5px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0 fs-5">🔍 Review Details</h4>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Clear</button>
+                    </div>
+
+                    <div id="inspectorImageContainer" class="text-center">
+                        <img id="inspectorImg" src="" class="inspector-img" alt="Screenshot" onclick="openImageInNewTab(this.src);" title="Click to enlarge">
+                        <div id="inspectorNoImage" class="text-muted p-3 small inspector-no-image" style="display:none;">
+                            🚫 No Screenshot Available
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span id="inspectorRating" class="me-2 fs-5"></span>
+                            <span id="inspectorFeature" class="badge bg-primary"></span>
+                        </div>
+
+                        <div class="inspector-text-scroll">
+                            <p id="inspectorText" class="mb-0" style="font-size: 0.95rem;"></p>
+                        </div>
+
+                        <div class="text-muted small">
+                            <strong>Device:</strong> <span id="inspectorDevice"></span><br>
+                            <strong>ID:</strong> <span id="inspectorId"></span>
+                        </div>
+
+                        <div id="logsSection" style="display:none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 5px;">
+                            <h6 class="text-muted mb-1" style="font-size: 0.9rem;">💻 Device Logs</h6>
+                            <div id="inspectorLogs" class="log-terminal"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-4">
@@ -252,11 +256,15 @@
           logsSection.style.display = 'none';
       }
 
-      document.getElementById('reviewInspector').style.display = 'block';
+      // SHOW CONTENT, HIDE EMPTY STATE
+      document.getElementById('inspectorEmptyState').style.display = 'none';
+      document.getElementById('reviewInspectorContent').style.display = 'flex';
     }
 
     function closeInspector() {
-      document.getElementById('reviewInspector').style.display = 'none';
+      // HIDE CONTENT, SHOW EMPTY STATE
+      document.getElementById('reviewInspectorContent').style.display = 'none';
+      document.getElementById('inspectorEmptyState').style.display = 'flex';
     }
 
     // ---------- FILTER ----------
