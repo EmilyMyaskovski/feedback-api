@@ -163,18 +163,31 @@
     }
 
     .country-card {
-
-  height: 700px;
-  overflow: auto; 
+      display: flex;
+    flex-direction: column;
+    overflow: hidden;
     }
 
-  .country-chart-area {
-  position: relative;
-  height: 260px;
-  flex-shrink: 0;
-  overflow: hidden;
+    .country-scroll-area{
+  flex: 1;
+  min-height: 0;     
+  overflow-y: auto;   /* scrollbar from top to bottom of the square */
+  padding-right: 6px; /* prevents content under scrollbar */
 }
 
+  .country-chart-area {
+   position: relative;
+  height: 260px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.country-reviews .reviews-scroll-container{
+  max-height: none;
+  overflow: visible;
+  border: none;
+  padding: 0;
+}
     #countryChart {
       position: absolute;
       inset: 0;

@@ -64,7 +64,7 @@
           <!-- Country Panel -->
           <div class="chart-card flex-grow-1 country-card" style="min-height: 250px;">
             <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
-
+              <div class="country-scroll-area">
             <!-- IMPORTANT: This wrapper is what locks the emoji+caption inside the borders -->
             <div class="country-chart-area">
               <canvas id="countryChart"></canvas>
@@ -75,7 +75,7 @@
               </div>
             </div>
 
-            <div id="countryReviewsSection" style="display:none;">
+            <div id="countryReviewsSection" class="country-reviews" style="display:none;">
               <h6 class="text-muted mb-2 small">Click a review to inspect:</h6>
               <div class="reviews-scroll-container">
                 <table class="table table-sm table-hover mb-0">
