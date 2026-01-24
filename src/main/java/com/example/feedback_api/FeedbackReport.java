@@ -33,6 +33,7 @@ public class FeedbackReport {
     private int userAge;
     private String userGender;
     private Instant createdAt = Instant.now();
+    private String logs;
 
     public FeedbackReport() {}
 
@@ -68,4 +69,7 @@ public class FeedbackReport {
 
     public String getUserGender() { return userGender; }
     public void setUserGender(String userGender) { this.userGender = userGender; }
+
+    public String getLogs() { return logs; }
+    public void setLogs(String logs) { this.logs = logs; }
 }

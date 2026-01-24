@@ -13,8 +13,9 @@ body {
 .reviews-scroll-container::-webkit-scrollbar,
 .table-scroll-container::-webkit-scrollbar,
 .inspector-text-scroll::-webkit-scrollbar,
+.log-terminal::-webkit-scrollbar, /* הוספנו את הטרמינל לרשימה */
 #reviewInspector::-webkit-scrollbar,
-.country-scroll-area::-webkit-scrollbar { 
+.country-scroll-area::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
@@ -22,6 +23,7 @@ body {
 .reviews-scroll-container::-webkit-scrollbar-track,
 .table-scroll-container::-webkit-scrollbar-track,
 .inspector-text-scroll::-webkit-scrollbar-track,
+.log-terminal::-webkit-scrollbar-track,
 #reviewInspector::-webkit-scrollbar-track,
 .country-scroll-area::-webkit-scrollbar-track {
     background: #f1f1f1;
@@ -31,6 +33,7 @@ body {
 .reviews-scroll-container::-webkit-scrollbar-thumb,
 .table-scroll-container::-webkit-scrollbar-thumb,
 .inspector-text-scroll::-webkit-scrollbar-thumb,
+.log-terminal::-webkit-scrollbar-thumb,
 #reviewInspector::-webkit-scrollbar-thumb,
 .country-scroll-area::-webkit-scrollbar-thumb {
     background: #ccc; 
@@ -40,6 +43,7 @@ body {
 .reviews-scroll-container::-webkit-scrollbar-thumb:hover,
 .table-scroll-container::-webkit-scrollbar-thumb:hover,
 .inspector-text-scroll::-webkit-scrollbar-thumb:hover,
+.log-terminal::-webkit-scrollbar-thumb:hover,
 #reviewInspector::-webkit-scrollbar-thumb:hover,
 .country-scroll-area::-webkit-scrollbar-thumb:hover {
     background: #bbb; 
@@ -145,6 +149,21 @@ h1, h2, h3, h4 { font-weight: 700; }
   border: 1px solid #eee;
 }
 
+/* --- NEW: Log Terminal Style --- */
+.log-terminal {
+    background-color: #1e1e1e; /* Dark background */
+    color: #4caf50;           /* Terminal Green text */
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace; /* Code font */
+    font-size: 0.8rem;
+    padding: 12px;
+    border-radius: 6px;
+    max-height: 200px;        /* Scrollable height */
+    overflow-y: auto;
+    white-space: pre-wrap;    /* Preserve line breaks and spaces */
+    border: 1px solid #333;
+    margin-top: 5px;
+}
+
 /* Layout Helpers */
 .flex-card-container {
   display: flex;
@@ -160,30 +179,27 @@ h1, h2, h3, h4 { font-weight: 700; }
 }
 
 #reviewInspector {
-  max-height: 320px;  
-  overflow: auto;
+  max-height: none;  /* Changed to allow expansion for logs */
+  overflow: visible;
 }
-
-/* --- Country Card Specific Styling --- */
 
 .country-card {
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent double scrollbars on the card itself */
+  overflow: hidden; 
 }
 
-/* The MAIN scroll wrapper for the country section */
 .country-scroll-area {
-  flex: 1;             /* Fill remaining height */
-  overflow-y: auto;    /* Enable the single vertical scrollbar */
+  flex: 1;             
+  overflow-y: auto;    
   min-height: 0;
-  padding-right: 4px;  /* Avoid content hiding behind scrollbar */
+  padding-right: 4px;  
 }
 
 .country-chart-area {
   position: relative;
-  height: 260px;       /* Keep chart height fixed */
-  flex-shrink: 0;      /* prevents chart shrink when table grows */
+  height: 260px;       
+  flex-shrink: 0;      
   overflow: hidden;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -197,21 +213,19 @@ h1, h2, h3, h4 { font-weight: 700; }
   display: none; 
 }
 
-/* Reviews section expands freely */
 #countryReviewsSection {
   display: block;      
-  height: auto;        /* Grow with content */
-  overflow: visible;   /* No internal scroll */
+  height: auto;        
+  overflow: visible;   
   margin-top: 10px;
   border-top: 1px solid #eee;
   padding-top: 10px;
 }
 
-/* Inner table container expands freely */
 #countryReviewsSection .reviews-scroll-container {
   height: auto;
-  max-height: none;    /* Remove limits */
-  overflow: visible;   /* No internal scroll */
+  max-height: none;    
+  overflow: visible;   
   border: none;
   padding: 0;
 }

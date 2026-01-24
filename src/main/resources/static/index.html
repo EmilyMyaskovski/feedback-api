@@ -30,8 +30,7 @@
       <div class="col-lg-4">
         <div class="flex-card-container" style="height: 700px;">
 
-          <!-- Review Inspector -->
-          <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff;">
+          <div id="reviewInspector" class="chart-card auto-height-card" style="display:none; border-left: 5px solid #3f51b5; background-color: #fff; max-height: 700px; overflow-y: auto;">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h4 class="mb-0 fs-5">🔍 Review Details</h4>
               <button class="btn btn-sm btn-outline-secondary" onclick="closeInspector()">Close</button>
@@ -58,14 +57,19 @@
                 <strong>Device:</strong> <span id="inspectorDevice"></span><br>
                 <strong>ID:</strong> <span id="inspectorId"></span>
               </div>
+
+              <div id="logsSection" style="display:none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                  <h6 class="text-muted mb-2">💻 Device Logs</h6>
+                  <div id="inspectorLogs" class="log-terminal"></div>
+              </div>
+
             </div>
           </div>
 
-          <!-- Country Panel -->
           <div class="chart-card flex-grow-1 country-card" style="min-height: 250px;">
             <h4 class="text-center mb-2" id="countryChartTitle">Select a Country</h4>
               <div class="country-scroll-area">
-            <!-- IMPORTANT: This wrapper is what locks the emoji+caption inside the borders -->
+            
             <div class="country-chart-area">
               <canvas id="countryChart"></canvas>
 
@@ -101,11 +105,13 @@
       </div>
 
       <div class="col-lg-6">
-        <div class="chart-card" style="height: 500px;">
-          <h4 class="mb-3">📝 Recent User Reports (Click row to inspect)</h4>
+        <div class="chart-card chart-card-flush" style="height: 500px;">
+          <div class="card-header-padded">
+            <h4 class="mb-0">📝 Recent User Reports (Click row to inspect)</h4>
+          </div>
           <div class="table-scroll-container">
             <table class="table table-hover table-striped mb-0">
-              <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+              <thead style="position: sticky; top: 0; background: white; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <tr>
                   <th>ID</th>
                   <th>Feature</th>
@@ -146,20 +152,20 @@
     let countryChartInstance = null;
     let allFeedbackData = [];
 
-    // Function to open an image in a new window (bypasses browser blocking)
     function openImageInNewTab(src) {
+        if (!src || src === "") return;
         const w = window.open("");
-        w.document.write(`
-            <html>
-                <head>
-                    <title>Screenshot View</title>
-                </head>
-                <body style="margin:0; background-color:#222; display:flex; align-items:center; justify-content:center; height:100vh;">
-                    <img src="${src}" style="max-width:100%; max-height:100%; box-shadow: 0 0 20px rgba(0,0,0,0.5);" />
-                </body>
-            </html>
-        `);
-        w.document.close();
+        if(w) {
+            w.document.write(`
+                <html>
+                    <head><title>Screenshot View</title></head>
+                    <body style="margin:0; background-color:#222; display:flex; align-items:center; justify-content:center; height:100vh;">
+                        <img src="${src}" style="max-width:100%; max-height:100vh; box-shadow: 0 0 20px rgba(0,0,0,0.5);" />
+                    </body>
+                </html>
+            `);
+            w.document.close();
+        }
     }
 
     function loadScript(src) {
@@ -233,6 +239,17 @@
       } else {
         imgEl.style.display = 'none';
         noImgEl.style.display = 'block';
+      }
+
+      // --- LOGIC FOR LOGS ---
+      const logsSection = document.getElementById('logsSection');
+      const logsContent = document.getElementById('inspectorLogs');
+
+      if (report.logs && report.logs.trim().length > 0) {
+          logsSection.style.display = 'block';
+          logsContent.innerText = report.logs;
+      } else {
+          logsSection.style.display = 'none';
       }
 
       document.getElementById('reviewInspector').style.display = 'block';
