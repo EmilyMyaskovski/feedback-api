@@ -1,227 +1,232 @@
 /* prevent layout shift when scrollbar appears/disappears */
-    html {
-      overflow-y: scroll;         
-      scrollbar-gutter: stable;   
-    }
-
-    body {
-      background-color: #f4f6f9;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    /* --- Scrollbar Styling --- */
-    .reviews-scroll-container::-webkit-scrollbar,
-    .table-scroll-container::-webkit-scrollbar,
-    .inspector-text-scroll::-webkit-scrollbar,
-    #reviewInspector::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    .reviews-scroll-container::-webkit-scrollbar-track,
-    .table-scroll-container::-webkit-scrollbar-track,
-    .inspector-text-scroll::-webkit-scrollbar-track,
-    #reviewInspector::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .reviews-scroll-container::-webkit-scrollbar-thumb,
-    .table-scroll-container::-webkit-scrollbar-thumb,
-    .inspector-text-scroll::-webkit-scrollbar-thumb,
-    #reviewInspector::-webkit-scrollbar-thumb {
-        background: #ccc; 
-        border-radius: 4px;
-    }
-
-    .reviews-scroll-container::-webkit-scrollbar-thumb:hover,
-    .table-scroll-container::-webkit-scrollbar-thumb:hover,
-    .inspector-text-scroll::-webkit-scrollbar-thumb:hover,
-    #reviewInspector::-webkit-scrollbar-thumb:hover {
-        background: #bbb; 
-    }
-
-    /* Cards */
-    .chart-card {
-      background: white;
-      padding: 20px; /* Default padding */
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden; /* Keeps content inside rounded corners */
-    }
-
-    .chart-card-flush {
-        padding: 0 !important; 
-    }
-
-    /* Padding for the header inside a flush card */
-    .card-header-padded {
-        padding: 20px 20px 10px 20px;
-        background: #fff;
-        z-index: 2;
-    }
-
-    .header-bg {
-      background-color: #3f51b5;
-      color: white;
-      padding: 40px 0;
-      margin-bottom: 30px;
-    }
-
-    h1, h2, h3, h4 { font-weight: 700; }
-
-    /* Filters */
-    .filter-input {
-      width: 100%;
-      padding: 4px 8px;
-      font-size: 13px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    .filter-row th {
-      background-color: #f8f9fa;
-      padding: 10px 5px; /* More padding for cleaner look */
-      border-bottom: 1px solid #eee;
-    }
-
-    /* Scroll containers */
-    .reviews-scroll-container { 
-        overflow-y: auto; 
-        max-height: 250px;
-        border: 1px solid #eee;
-        border-radius: 8px;
-        padding: 5px;
-    }
-    
-    .table-scroll-container { 
-        flex-grow: 1; 
-        overflow-y: auto; 
-        /* Ensure scrollbar hits the edge */
-        width: 100%; 
-    }
-
-    /* Clickable rows */
-    .clickable-row {
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .clickable-row:hover {
-        background-color: #e8eaf6 !important;
-    }
-
-    /* Inspector Image */
-    .inspector-img {
-        width: 100%;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        margin-bottom: 10px;
-        max-height: 200px;
-        object-fit: contain;
-        background-color: #000;
-        cursor: pointer; 
-        transition: opacity 0.2s;
-    }
-
-    .inspector-img:hover {
-        opacity: 0.9;
-    }
-
-    /* Inspector scroll area */
-    .inspector-text-scroll {
-      max-height: 150px;
-      overflow-y: auto;
-      background: #f8f9fa;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      border: 1px solid #eee;
-    }
-
-    /* Layout Helpers */
-    .flex-card-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      gap: 20px;
-      overflow: hidden;
-    }
-
-    .auto-height-card {
-      height: auto !important;
-      flex-shrink: 0;
-    }
-
-    #reviewInspector {
-      max-height: 320px;  
-      overflow: auto;
-    }
-
-    .country-card {
-      display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    }
-
-    .country-scroll-area{
-  flex: 1;
-  min-height: 0;     
-  overflow-y: auto;   /* scrollbar from top to bottom of the square */
-  padding-right: 6px; /* prevents content under scrollbar */
+html {
+  overflow-y: scroll;         
+  scrollbar-gutter: stable;   
 }
 
-  .country-chart-area {
-   position: relative;
-  height: 260px;
+body {
+  background-color: #f4f6f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* --- Scrollbar Styling --- */
+.reviews-scroll-container::-webkit-scrollbar,
+.table-scroll-container::-webkit-scrollbar,
+.inspector-text-scroll::-webkit-scrollbar,
+#reviewInspector::-webkit-scrollbar,
+.country-scroll-area::-webkit-scrollbar { 
+    width: 8px;
+    height: 8px;
+}
+
+.reviews-scroll-container::-webkit-scrollbar-track,
+.table-scroll-container::-webkit-scrollbar-track,
+.inspector-text-scroll::-webkit-scrollbar-track,
+#reviewInspector::-webkit-scrollbar-track,
+.country-scroll-area::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.reviews-scroll-container::-webkit-scrollbar-thumb,
+.table-scroll-container::-webkit-scrollbar-thumb,
+.inspector-text-scroll::-webkit-scrollbar-thumb,
+#reviewInspector::-webkit-scrollbar-thumb,
+.country-scroll-area::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 4px;
+}
+
+.reviews-scroll-container::-webkit-scrollbar-thumb:hover,
+.table-scroll-container::-webkit-scrollbar-thumb:hover,
+.inspector-text-scroll::-webkit-scrollbar-thumb:hover,
+#reviewInspector::-webkit-scrollbar-thumb:hover,
+.country-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: #bbb; 
+}
+
+/* Cards */
+.chart-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chart-card-flush {
+    padding: 0 !important; 
+}
+
+.card-header-padded {
+    padding: 20px 20px 10px 20px;
+    background: #fff;
+    z-index: 2;
+}
+
+.header-bg {
+  background-color: #3f51b5;
+  color: white;
+  padding: 40px 0;
+  margin-bottom: 30px;
+}
+
+h1, h2, h3, h4 { font-weight: 700; }
+
+/* Filters */
+.filter-input {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.filter-row th {
+  background-color: #f8f9fa;
+  padding: 10px 5px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Scroll containers */
+.reviews-scroll-container { 
+    overflow-y: auto; 
+    max-height: 250px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.table-scroll-container { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    width: 100%; 
+}
+
+/* Clickable rows */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clickable-row:hover {
+    background-color: #e8eaf6 !important;
+}
+
+/* Inspector Image */
+.inspector-img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    max-height: 200px;
+    object-fit: contain;
+    background-color: #000;
+    cursor: pointer; 
+    transition: opacity 0.2s;
+}
+
+.inspector-img:hover {
+    opacity: 0.9;
+}
+
+/* Inspector scroll area */
+.inspector-text-scroll {
+  max-height: 150px;
+  overflow-y: auto;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #eee;
+}
+
+/* Layout Helpers */
+.flex-card-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 20px;
+  overflow: hidden;
+}
+
+.auto-height-card {
+  height: auto !important;
+  flex-shrink: 0;
+}
+
+#reviewInspector {
+  max-height: 320px;  
+  overflow: auto;
+}
+
+/* --- Country Card Specific Styling --- */
+
+.country-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent double scrollbars on the card itself */
+}
+
+/* The MAIN scroll wrapper for the country section */
+.country-scroll-area {
+  flex: 1;             /* Fill remaining height */
+  overflow-y: auto;    /* Enable the single vertical scrollbar */
+  min-height: 0;
+  padding-right: 4px;  /* Avoid content hiding behind scrollbar */
+}
+
+.country-chart-area {
+  position: relative;
+  height: 260px;       /* Keep chart height fixed */
+  flex-shrink: 0;      /* prevents chart shrink when table grows */
   overflow: hidden;
   border-radius: 10px;
+  margin-bottom: 10px;
 }
 
-.country-reviews .reviews-scroll-container{
-  max-height: none;
-  overflow: visible;
-  border: none;
-  padding: 0;
+#countryChart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none; 
 }
-    #countryChart {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: none; 
-    }
 
-    #countryReviewsSection {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+/* Reviews section expands freely */
+#countryReviewsSection {
+  display: block;      
+  height: auto;        /* Grow with content */
+  overflow: visible;   /* No internal scroll */
   margin-top: 10px;
   border-top: 1px solid #eee;
   padding-top: 10px;
 }
 
-/* Inner table scroll fills the area */
+/* Inner table container expands freely */
 #countryReviewsSection .reviews-scroll-container {
-  height: 100%;
-  overflow-y: auto;
+  height: auto;
+  max-height: none;    /* Remove limits */
+  overflow: visible;   /* No internal scroll */
+  border: none;
+  padding: 0;
 }
 
-    #countryEmptyState.empty-state {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      padding: 16px;
-      text-align: center;
-      overflow: hidden; 
-    }
+#countryEmptyState.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 16px;
+  text-align: center;
+  overflow: hidden; 
+}
 
-    .empty-emoji { font-size: 3rem; line-height: 1; }
-    .empty-caption { margin: 0; max-width: 85%; word-break: break-word; }
+.empty-emoji { font-size: 3rem; line-height: 1; }
+.empty-caption { margin: 0; max-width: 85%; word-break: break-word; }
