@@ -13,11 +13,11 @@ body {
 .reviews-scroll-container::-webkit-scrollbar,
 .table-scroll-container::-webkit-scrollbar,
 .inspector-text-scroll::-webkit-scrollbar,
-.log-terminal::-webkit-scrollbar, 
+.log-terminal::-webkit-scrollbar, /* הוספנו את הטרמינל לרשימה */
 #reviewInspector::-webkit-scrollbar,
 .country-scroll-area::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 
 .reviews-scroll-container::-webkit-scrollbar-track,
@@ -140,7 +140,7 @@ h1, h2, h3, h4 { font-weight: 700; }
 
 /* Inspector scroll area */
 .inspector-text-scroll {
-  max-height: 80px;
+  max-height: 150px;
   overflow-y: auto;
   background: #f8f9fa;
   padding: 10px;
@@ -179,9 +179,7 @@ h1, h2, h3, h4 { font-weight: 700; }
 }
 
 #reviewInspector {
-  max-height: 60%; 
-  display: flex;
-  flex-direction: column;
+  max-height: none;  /* Changed to allow expansion for logs */
   overflow: visible;
 }
 
@@ -189,8 +187,6 @@ h1, h2, h3, h4 { font-weight: 700; }
   display: flex;
   flex-direction: column;
   overflow: hidden; 
-  flex: 1;
-  min-height: 0;
 }
 
 .country-scroll-area {
@@ -202,7 +198,7 @@ h1, h2, h3, h4 { font-weight: 700; }
 
 .country-chart-area {
   position: relative;
-  height: 200px;       
+  height: 260px;       
   flex-shrink: 0;      
   overflow: hidden;
   border-radius: 10px;
