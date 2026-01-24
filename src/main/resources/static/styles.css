@@ -163,16 +163,18 @@
     }
 
     .country-card {
-      min-height: 0;      
-      overflow: hidden;   
+      display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; 
     }
 
-    .country-chart-area {
-      position: relative;
-      flex: 1;
-      min-height: 220px;     
-      overflow: hidden;  
-    }
+  .country-chart-area {
+  position: relative;
+  height: 260px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
 
     #countryChart {
       position: absolute;
@@ -181,6 +183,21 @@
       height: 100%;
       display: none; 
     }
+
+    #countryReviewsSection {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+/* Inner table scroll fills the area */
+#countryReviewsSection .reviews-scroll-container {
+  height: 100%;
+  overflow-y: auto;
+}
 
     #countryEmptyState.empty-state {
       position: absolute;
