@@ -9,6 +9,43 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Scrollbars */
+    /* Setting the width of the bar */
+    .reviews-scroll-container::-webkit-scrollbar,
+    .table-scroll-container::-webkit-scrollbar,
+    .inspector-text-scroll::-webkit-scrollbar,
+    #reviewInspector::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    /* Setting the background of the track */
+    .reviews-scroll-container::-webkit-scrollbar-track,
+    .table-scroll-container::-webkit-scrollbar-track,
+    .inspector-text-scroll::-webkit-scrollbar-track,
+    #reviewInspector::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    /* Setting the handle */
+    .reviews-scroll-container::-webkit-scrollbar-thumb,
+    .table-scroll-container::-webkit-scrollbar-thumb,
+    .inspector-text-scroll::-webkit-scrollbar-thumb,
+    #reviewInspector::-webkit-scrollbar-thumb {
+        background: #ccc; 
+        border-radius: 4px;
+    }
+
+    /* Color change when standing on the stripe */
+    .reviews-scroll-container::-webkit-scrollbar-thumb:hover,
+    .table-scroll-container::-webkit-scrollbar-thumb:hover,
+    .inspector-text-scroll::-webkit-scrollbar-thumb:hover,
+    #reviewInspector::-webkit-scrollbar-thumb:hover {
+        background: #bbb; 
+    }
+    /* ------------------------------------------------ */
+
 /* Cards */
 .chart-card {
   background: white;
@@ -52,9 +89,6 @@ h1, h2, h3, h4 { font-weight: 700; }
   border-radius: 8px;
   padding: 5px;
 }
-
-.reviews-scroll-container { max-height: 250px; }
-.table-scroll-container { flex-grow: 1; }
 
 /* Clickable rows */
 .clickable-row {
