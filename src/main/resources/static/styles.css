@@ -163,10 +163,9 @@
     }
 
     .country-card {
-      display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden; 
+
+  height: 700px;
+  overflow: auto; 
     }
 
   .country-chart-area {
