@@ -1,3 +1,4 @@
+Click here for full Documentation: https://emilymyaskovski.github.io/SmartFeedbackWorkspace/
 # 📱 Smart Feedback SDK & Analytics Portal
 
 > **Bridge the gap between your users and your development team.** > A full-stack solution for collecting real-time user feedback, bug reports, and crash logs from Android applications, visualized in a powerful web dashboard.
