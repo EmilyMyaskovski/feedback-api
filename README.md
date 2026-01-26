@@ -1,4 +1,4 @@
-Click here for full Documentation: https://emilymyaskovski.github.io/SmartFeedbackWorkspace/
+View Source Code on GitHub: https://github.com/emilymyaskovski/SmartFeedbackWorkspace
 # 📱 Smart Feedback SDK & Analytics Portal
 
 > **Bridge the gap between your users and your development team.** > A full-stack solution for collecting real-time user feedback, bug reports, and crash logs from Android applications, visualized in a powerful web dashboard.
@@ -59,20 +59,21 @@ All data is sent to a cloud backend and presented in a live **Analytics Dashboar
 ## 🚀 Integration Guide (Android)
 
 ### 1. Setup
-Add the SDK module to your project.Add it in your root settings.gradle at the end of repositories:
+Add the SDK module to your project.
+Add it in your root settings.gradle at the end of repositories:
 
-dependencyResolutionManagement {
-	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-	repositories {
-		mavenCentral()
-		maven { url 'https://jitpack.io' }
+	dependencyResolutionManagement {
+		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+		repositories {
+			mavenCentral()
+			maven { url 'https://jitpack.io' }
+		}
 	}
-}
 Step 2. Add the dependency
 
-dependencies {
-        implementation 'com.github.EmilyMyaskovski:SmartFeedbackWorkspace:1.0.0'
-}
+	dependencies {
+	        implementation 'com.github.EmilyMyaskovski:SmartFeedbackWorkspace:1.0.0'
+	}
 
 ### 2. Usage
 Trigger the feedback view from any Activity or Fragment. Pass the current `Activity` and a `Feature Tag` (to identify where the user is).
@@ -111,5 +112,3 @@ Bash
 │   ├── network/        # Retrofit & Data Models
 │   └── ui/             # FeedbackFragment & Layouts
 └── web-dashboard/      # HTML/JS/CSS files for the Analytics Portal
-
-
