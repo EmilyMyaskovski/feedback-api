@@ -59,7 +59,20 @@ All data is sent to a cloud backend and presented in a live **Analytics Dashboar
 ## 🚀 Integration Guide (Android)
 
 ### 1. Setup
-Add the SDK module to your project.
+Add the SDK module to your project.Add it in your root settings.gradle at the end of repositories:
+
+dependencyResolutionManagement {
+	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+	repositories {
+		mavenCentral()
+		maven { url 'https://jitpack.io' }
+	}
+}
+Step 2. Add the dependency
+
+dependencies {
+        implementation 'com.github.EmilyMyaskovski:SmartFeedbackWorkspace:1.0.0'
+}
 
 ### 2. Usage
 Trigger the feedback view from any Activity or Fragment. Pass the current `Activity` and a `Feature Tag` (to identify where the user is).
